@@ -1,0 +1,6 @@
+objs/
+bin/
+*.o
+logs/
+*.log
+.vscode/
