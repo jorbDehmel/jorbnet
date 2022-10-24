@@ -14,7 +14,7 @@ public:
 
 	int height() const;
 	int width() const;
-	inline bool is_square() const { return height_var == width_var; };
+	inline bool is_square() const { return height_var == width_var; }
 
 	void set(const int h, const int w, T data);
 	T get(const int h, const int w) const;

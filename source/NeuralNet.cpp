@@ -1,1 +1,1 @@
-#include "../headers/NeuralNet.h"
+#include "../headers/neuralNet.h"
