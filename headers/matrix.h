@@ -36,6 +36,17 @@ public:
 };
 
 template <class T>
+ostream& operator << (ostream &stream, const Matrix<T> &m) {
+	for (int i = 1; i <= m.height(); i++) {
+		for (int j = 1; j <= m.width(); j++) {
+			stream << m.get(i, j) << '\t';
+		}
+		stream << '\n';
+	}
+	return stream;
+}
+
+template <class T>
 Matrix<T>::Matrix(int h, int w) {
 	height_var = h;
 	width_var = w;
@@ -94,6 +105,7 @@ T Matrix<T>::get(const int h, const int w) const {
 	if (h <= height_var && h > 0 && w <= width_var && w > 0) {
 		return arr[h - 1][w - 1];
 	} else {
+		cout << h << ' ' << w << '\n';
 		throw runtime_error("Invalid indices. Cannot get");
 	}
 }
@@ -102,27 +114,26 @@ template <class T>
 Matrix<T> *Matrix<T>::operator * (const Matrix<T> &other) const {
 	if (this->width_var != other.height()) {
 		throw runtime_error("Dimensional mismatch. Cannot dot product");
+	} else {
+		cout << height_var << "x" << width_var << " matrix dot " << other.height() << 'x' << other.width() << '\n';
 	}
 
 	Matrix<T> *out = new Matrix<T>(this->height_var, other.width());
 	T temp;
 
-	// cols in other
-	for (int c = 1; c <= this->width_var; c++) {
-		// rows in this
-		for (int r = 1; r <= this->height_var; r++) {
+	// for row in out
+	for (int row_num = 1; row_num <= height_var; row_num++) {
+		// for col in out
+		for (int col_num = 1; col_num <= width_var; col_num++) {
+			cout << row_num << ' ' << col_num << '\n';
 			
-			// dot product of the two
-			temp = this->get(r, 1) * other.get(1, c);
-			for (int i = 2; i <= this->width_var; i++) {
-				temp += this->get(r, i) * other.get(i, c);
+			out->arr[row_num - 1][col_num - 1] = 0;
+			for (int i = 1; i <= width_var; i++) {
+				out->arr[row_num - 1][col_num - 1] += arr[row_num - 1][i - 1] * other.arr[i - 1][col_num - 1];
 			}
-
-			out->set(r, c, temp);
 		}
 	}
-
-	return out;
+	return out;;
 }
 
 template <class T>

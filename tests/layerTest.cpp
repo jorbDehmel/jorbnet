@@ -13,6 +13,7 @@ int main() {
         input.set(i, 1, rand() % 10);
     }
 
+    cout << "Running\n";
     cout << l.run(input) << '\n';
     
     return 0;

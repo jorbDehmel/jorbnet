@@ -1,4 +1,4 @@
-#include "../headers/array.h"
+#include "../headers/matrix.h"
 
 #include <iostream>
 using namespace std;
