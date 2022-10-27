@@ -3,7 +3,36 @@
 
 #include "layer.h"
 
-// Multi Layer Perceptron, not my little pony
+void sigmoid(Matrix<double> *to_modify) {
+    double x;
+    for (int i = 1; i <= to_modify->height(); i++) {
+        x = to_modify->get(i, 1);
+        x = 1 / (1 + pow(2.721828, -x));
+        to_modify->set(i, 1, x);
+    }
+    return;
+}
+
+void sigmoidDer(Matrix<double> *to_modify) {
+    double x;
+    for (int i = 1; i <= to_modify->height(); i++) {
+        x = to_modify->get(i, 1);
+        x = sigmoidDer(x);
+        to_modify->set(i, 1, x);
+    }
+    return;
+}
+
+inline double sigmoid(double x) {
+    return 1 / (1 + pow(2.71828, -x));
+}
+
+inline double sigmoidDer(double x) {
+    x = sigmoid(x);
+    return x * (1 - x);
+}
+
+// Multi Layer Perceptron artificial neural network
 class MLP {
 public:
     MLP(int layers, int *dims);
@@ -16,8 +45,6 @@ private:
     int layers;
     int *dimensions;
     Layer **network;
-
-    
 };
 
 MLP::MLP(int l, int *dims) {
@@ -59,7 +86,7 @@ Matrix<double> *MLP::getActivation() const {
 }
 
 void MLP::train(Matrix<double> &correct) {
-
+    Matrix<double> error = *(correct - *getActivation());
 }
 
 #endif

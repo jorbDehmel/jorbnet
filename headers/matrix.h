@@ -22,7 +22,11 @@ public:
 
 	Matrix<T> *operator * (const Matrix<T> &other) const;
 	Matrix<T> *operator * (const T t) const;
+
+	Matrix<T> *operator + (const Matrix<T> &other) const;
 	Matrix<T> *operator + (const T t) const;
+
+	Matrix<T> *operator - (const Matrix<T> &other) const;
 	Matrix<T> *operator - (const T t) const;
 
 	Matrix<T> *operator *= (const T t) const;
@@ -146,11 +150,41 @@ Matrix<T> *Matrix<T>::operator * (const T t) const {
 }
 
 template <class T>
+Matrix<T> *Matrix<T>::operator + (const Matrix<T> &other) const {
+	if (height_var != other.height() || width_var != other.width()) {
+		throw runtime_error("Invalid operation");
+	}
+
+	Matrix<T> *out = new Matrix<T>(height_var, width_var);
+	for (int r = 1; r <= height_var; r++) {
+		for (int c = 1; c <= width_var; c++) {
+			out->set(r, c, get(r, c) + other.get(r, c));
+		}
+	}
+	return out;
+}
+
+template <class T>
 Matrix<T> *Matrix<T>::operator + (const T t) const {
 	Matrix<T> *out = new Matrix<T>(height_var, width_var);
 	for (int r = 1; r <= height_var; r++) {
 		for (int c = 1; c <= width_var; c++) {
 			out->set(r, c, get(r, c) + t);
+		}
+	}
+	return out;
+}
+
+template <class T>
+Matrix<T> *Matrix<T>::operator + (const Matrix<T> &other) const {
+	if (height_var != other.height() || width_var != other.width()) {
+		throw runtime_error("Invalid operation");
+	}
+
+	Matrix<T> *out = new Matrix<T>(height_var, width_var);
+	for (int r = 1; r <= height_var; r++) {
+		for (int c = 1; c <= width_var; c++) {
+			out->set(r, c, get(r, c) - other.get(r, c));
 		}
 	}
 	return out;

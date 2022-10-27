@@ -7,16 +7,6 @@
 
 constexpr int WEIGHT_RANGE = 50;
 
-void sigmoid(Matrix<double> *to_modify) {
-    double x;
-    for (int i = 1; i <= to_modify->height(); i++) {
-        x = to_modify->get(i, 1);
-        x = 1 / (1 + pow(2.721828, -x));
-        to_modify->set(i, 1, x);
-    }
-    return;
-}
-
 class Layer {
 public:
     Layer(const int input_s, const int s);
