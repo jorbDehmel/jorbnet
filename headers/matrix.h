@@ -8,6 +8,7 @@ template <class T>
 class Matrix {
 public:
 	Matrix<T>(int h, int w);
+	Matrix<T>(T **data, int h, int w);
 	~Matrix<T>();
 
 	void print(ostream& out) const;
@@ -37,12 +38,17 @@ public:
 
 template <class T>
 ostream& operator << (ostream &stream, const Matrix<T> &m) {
+	stream << "[";
 	for (int i = 1; i <= m.height(); i++) {
+		stream << "[";
 		for (int j = 1; j <= m.width(); j++) {
-			stream << m.get(i, j) << '\t';
+			stream << m.get(i, j);
+			if (j != m.width()) stream << ",\t";
 		}
-		stream << '\n';
+		stream << ']';
+		if (i != m.height()) stream << ",\n";
 	}
+	stream << "]\n";
 	return stream;
 }
 
@@ -51,9 +57,9 @@ Matrix<T>::Matrix(int h, int w) {
 	height_var = h;
 	width_var = w;
 
-	arr = new T*[h];
+	arr = new T*[h - 1];
 	for (int i = 0; i < h; i++) {
-		arr[i] = new T[w];
+		arr[i] = new T[w - 1];
 	}
 
 	return;
@@ -62,9 +68,8 @@ Matrix<T>::Matrix(int h, int w) {
 template <class T>
 Matrix<T>::~Matrix() {
 	for (int i = 0; i < height_var; i++) {
-		delete [] arr[i];
+		delete arr[i];
 	}
-	delete [] arr;
 
 	return;
 }
@@ -114,26 +119,19 @@ template <class T>
 Matrix<T> *Matrix<T>::operator * (const Matrix<T> &other) const {
 	if (this->width_var != other.height()) {
 		throw runtime_error("Dimensional mismatch. Cannot dot product");
-	} else {
-		cout << height_var << "x" << width_var << " matrix dot " << other.height() << 'x' << other.width() << '\n';
 	}
 
 	Matrix<T> *out = new Matrix<T>(this->height_var, other.width());
-	T temp;
-
-	// for row in out
-	for (int row_num = 1; row_num <= height_var; row_num++) {
-		// for col in out
-		for (int col_num = 1; col_num <= width_var; col_num++) {
-			cout << row_num << ' ' << col_num << '\n';
-			
-			out->arr[row_num - 1][col_num - 1] = 0;
-			for (int i = 1; i <= width_var; i++) {
-				out->arr[row_num - 1][col_num - 1] += arr[row_num - 1][i - 1] * other.arr[i - 1][col_num - 1];
+	
+	for (int row_num = 0; row_num < out->height(); row_num++) {
+		for (int col_num = 0; col_num < out->width(); col_num++) {
+			out->arr[row_num][col_num] = 0;
+			for (int i = 0; i < width_var; i++) {
+				out->arr[row_num][col_num] += this->arr[row_num][i] * other.arr[i][col_num];
 			}
 		}
 	}
-	return out;;
+	return out;
 }
 
 template <class T>
