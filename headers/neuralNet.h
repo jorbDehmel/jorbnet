@@ -49,7 +49,7 @@ private:
 
 MLP::MLP(int l, int *dims) {
     if (l <= 0) {
-        throw runtime_error("Invalid dimensions for a network");
+        throw nn_error("Invalid dimensions for a network");
     }
 
     layers = l;
@@ -57,7 +57,7 @@ MLP::MLP(int l, int *dims) {
     network = new Layer*[layers - 1];
     for (int d = 0; d < layers; d++) {
         if (dimensions[d] <= 0) {
-            throw runtime_error("Invalid dimensions for a network");
+            throw nn_error("Invalid dimensions for a network");
         }
 
         network[d] = new Layer(dimensions[d], dimensions[d + 1]);
@@ -87,6 +87,19 @@ Matrix<double> *MLP::getActivation() const {
 
 void MLP::train(Matrix<double> &correct) {
     Matrix<double> error = *(correct - *getActivation());
+
+    // Iterate over layers
+    for (int layer_num = layers - 1; layer_num >= 0; layer_num--) {
+        Matrix<double> deriv(*network[layer_num]->weights);
+        
+        // define deriv
+        
+        *network[layer_num]->weights -= deriv;
+    }
+
+    // d for l (weight of b in prev layer)
+    // derror(prev_layer_run(a, b, c)*i + prev_layer_run(a, b, c)*j + prev_layer_run(a, b, c)*k) *
+    // derror(previous activation) * dprevious_activation
 }
 
 #endif

@@ -9,6 +9,7 @@ class Matrix {
 public:
 	Matrix<T>(int h, int w);
 	Matrix<T>(T **data, int h, int w);
+	Matrix<T>(const Matrix<T> &other);
 	~Matrix<T>();
 
 	void print(ostream& out) const;
@@ -30,7 +31,11 @@ public:
 	Matrix<T> *operator - (const T t) const;
 
 	Matrix<T> *operator *= (const T t) const;
+
+	void operator += (const Matrix<T> &other) const;
 	Matrix<T> *operator += (const T t) const;
+
+	void operator -= (const Matrix<T> &other) const;
 	Matrix<T> *operator -= (const T t) const;
 
 	bool operator == (const Matrix<T> &other) const;
@@ -66,6 +71,22 @@ Matrix<T>::Matrix(int h, int w) {
 		arr[i] = new T[w - 1];
 	}
 
+	return;
+}
+
+template <class T>
+Matrix<T>::Matrix(const Matrix<T> &other) {
+	height_var = other.height_var;
+	width_var = other.width_var;
+	
+	arr = new T*[height_var - 1];
+	for (int i = 0; i < height_var; i++) {
+		arr[i] = new T[width_var - 1];
+		for (int j = 0; j < width_var; j++) {
+			arr[i][j] = other.arr[i][j];
+		}
+	}
+	
 	return;
 }
 
@@ -191,14 +212,34 @@ Matrix<T> *Matrix<T>::operator + (const Matrix<T> &other) const {
 }
 
 template <class T>
+void Matrix<T>::operator += (const Matrix<T> &other) const {
+	for (int r = =0; r < height_var; r++) {
+		for (int c = 0; c < width_var; c++) {
+			arr[r][c] += other.arr[r][c];
+		}
+	}
+	return;
+}
+
+template <class T>
 Matrix<T> *Matrix<T>::operator - (const T t) const {
 	Matrix<T> *out = new Matrix<T>(height_var, width_var);
-	for (int r = 1; r <= height_var; r++) {
-		for (int c = 1; c <= width_var; c++) {
-			out->set(r, c, get(r, c) - t);
+	for (int r = 0; r < height_var; r++) {
+		for (int c = 0; c < width_var; c++) {
+			out->arr[r][c] = arr[r][c] - t;
 		}
 	}
 	return out;
+}
+
+template <class T>
+void Matrix<T>::operator -= (const Matrix<T> &other) const {
+	for (int r = =0; r < height_var; r++) {
+		for (int c = 0; c < width_var; c++) {
+			arr[r][c] -= other.arr[r][c];
+		}
+	}
+	return;
 }
 
 template <class T>

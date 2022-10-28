@@ -7,14 +7,21 @@
 
 constexpr int WEIGHT_RANGE = 50;
 
-class Layer {
+class nn_error: public runtime_error {
 public:
+    nn_error(const char what[]): runtime_error(what) {};
+};
+
+struct Layer {
     Layer(const int input_s, const int s);
     
     Matrix<double> *run(const Matrix<double> &input);
     inline Matrix<double> *getActivation() { return activation; }
     inline Matrix<double> *getWeights() const { return weights; }
-protected:
+
+    inline int getInputSize() const { return input_size; }
+    inline int getSize() const { return weights->height(); }
+    
     int input_size;
 
     Matrix<double> *weights;
@@ -51,7 +58,7 @@ Matrix<double> *Layer::run(const Matrix<double> &input) {
 
 void Layer::biasedDotProduct(const Matrix<double> &input) {
     if (weights->width_var != (input.height() + 1)) {
-		throw runtime_error("Dimensional mismatch. Cannot dot product");
+		throw nn_error("Dimensional mismatch. Cannot dot product");
 	}
 	
 	for (int row_num = 0; row_num < activation->height(); row_num++) {
