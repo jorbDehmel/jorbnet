@@ -3,7 +3,7 @@
 
 #include "layer.h"
 
-//
+/////////////////////////////////////////////////////////
 
 void sigmoid(Matrix<double> *to_modify) {
     double x;
@@ -33,6 +33,8 @@ inline double sigmoidDer(double x) {
     x = sigmoid(x);
     return x * (1 - x);
 }
+
+/////////////////////////////////////////////////////////
 
 // Multi Layer Perceptron artificial neural network
 class MLP {
@@ -74,6 +76,8 @@ MLP::~MLP() {
     return;
 }
 
+/////////////////////////////////////////////////////////
+
 void MLP::run(Matrix<double> &input) {
     network[0]->run(input);
     for (int i = 1; i < layers; i++) {
@@ -102,5 +106,7 @@ void MLP::train(Matrix<double> &correct) {
     // derror(prev_layer_run(a, b, c)*i + prev_layer_run(a, b, c)*j + prev_layer_run(a, b, c)*k) *
     // derror(previous activation) * dprevious_activation
 }
+
+/////////////////////////////////////////////////////////
 
 #endif

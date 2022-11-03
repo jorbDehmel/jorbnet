@@ -5,6 +5,8 @@
 #include "vector.h"
 #include <cmath>
 
+/////////////////////////////////////////////////////////
+
 constexpr int WEIGHT_RANGE = 50;
 
 class nn_error: public runtime_error {
@@ -30,6 +32,8 @@ struct Layer {
     void biasedDotProduct(const Matrix<double> &input);
 };
 
+/////////////////////////////////////////////////////////
+
 // Initialize dynamically allocated stuff, randomize weights
 Layer::Layer(const int input_s, const int s) {
     input_size = input_s;
@@ -45,6 +49,8 @@ Layer::Layer(const int input_s, const int s) {
 
     return;
 }
+
+/////////////////////////////////////////////////////////
 
 // Update the activation given input vector
 Matrix<double> *Layer::run(const Matrix<double> &input) {
@@ -72,5 +78,7 @@ void Layer::biasedDotProduct(const Matrix<double> &input) {
 	}
     
 }
+
+/////////////////////////////////////////////////////////
 
 #endif

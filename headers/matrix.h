@@ -51,6 +51,7 @@ public:
 
 /////////////////////////////////////////////////////////
 
+// Output a prettified version of the matrix to a stream
 template <class T>
 ostream& operator << (ostream &stream, const Matrix<T> &m) {
 	stream << "[";
@@ -69,6 +70,7 @@ ostream& operator << (ostream &stream, const Matrix<T> &m) {
 
 /////////////////////////////////////////////////////////
 
+// Construct an empty matrix of size h by w
 template <class T>
 Matrix<T>::Matrix(int h, int w) {
 	height_var = h;
@@ -82,6 +84,7 @@ Matrix<T>::Matrix(int h, int w) {
 	return;
 }
 
+// Copy constructor
 template <class T>
 Matrix<T>::Matrix(const Matrix<T> &other) {
 	height_var = other.height_var;
@@ -98,6 +101,7 @@ Matrix<T>::Matrix(const Matrix<T> &other) {
 	return;
 }
 
+// Deallocate memory
 template <class T>
 Matrix<T>::~Matrix() {
 	for (int i = 0; i < height_var; i++) {
@@ -109,6 +113,7 @@ Matrix<T>::~Matrix() {
 
 /////////////////////////////////////////////////////////
 
+// Print to a stream
 template <class T>
 void Matrix<T>::print(ostream& out) const {
 	for (int r = 1; r <= height_var; r++) {
@@ -120,16 +125,19 @@ void Matrix<T>::print(ostream& out) const {
 	return;
 }
 
+// Return height
 template <class T>
 int Matrix<T>::height() const {
 	return height_var;
 }
 
+// Return width
 template <class T>
 int Matrix<T>::width() const {
 	return width_var;
 }
 
+// Set the item at [h, w] to data
 template <class T>
 void Matrix<T>::set(const int h, const int w, T data) {
 	if (h <= height_var && h > 0 && w <= width_var && w > 0) {
@@ -140,6 +148,7 @@ void Matrix<T>::set(const int h, const int w, T data) {
 	return;
 }
 
+// Return the item at [h, w]
 template <class T>
 T Matrix<T>::get(const int h, const int w) const {
 	if (h <= height_var && h > 0 && w <= width_var && w > 0) {
@@ -150,6 +159,7 @@ T Matrix<T>::get(const int h, const int w) const {
 	}
 }
 
+// arr[i, j] *= other->arr[i, j]
 template <class T>
 void Matrix<T>::naiveInplaceMultiply(const Matrix<T> &other) {
 	if (other->height() == height() && other->width() == width()) {
@@ -167,6 +177,7 @@ void Matrix<T>::naiveInplaceMultiply(const Matrix<T> &other) {
 
 /////////////////////////////////////////////////////////
 
+// Dot product
 template <class T>
 Matrix<T> *Matrix<T>::operator * (const Matrix<T> &other) const {
 	if (this->width_var != other.height()) {
@@ -186,6 +197,7 @@ Matrix<T> *Matrix<T>::operator * (const Matrix<T> &other) const {
 	return out;
 }
 
+// Scalar multiplication
 template <class T>
 Matrix<T> *Matrix<T>::operator * (const T t) const {
 	Matrix<T> *out = new Matrix<T>(height_var, width_var);
@@ -197,6 +209,7 @@ Matrix<T> *Matrix<T>::operator * (const T t) const {
 	return out;
 }
 
+// Matrix addition
 template <class T>
 Matrix<T> *Matrix<T>::operator + (const Matrix<T> &other) const {
 	if (height_var != other.height() || width_var != other.width()) {
@@ -212,6 +225,7 @@ Matrix<T> *Matrix<T>::operator + (const Matrix<T> &other) const {
 	return out;
 }
 
+// Scalar addition
 template <class T>
 Matrix<T> *Matrix<T>::operator + (const T t) const {
 	Matrix<T> *out = new Matrix<T>(height_var, width_var);
@@ -223,8 +237,9 @@ Matrix<T> *Matrix<T>::operator + (const T t) const {
 	return out;
 }
 
+// Matrix subtraction
 template <class T>
-Matrix<T> *Matrix<T>::operator + (const Matrix<T> &other) const {
+Matrix<T> *Matrix<T>::operator - (const Matrix<T> &other) const {
 	if (height_var != other.height() || width_var != other.width()) {
 		throw runtime_error("Invalid operation");
 	}
@@ -238,6 +253,7 @@ Matrix<T> *Matrix<T>::operator + (const Matrix<T> &other) const {
 	return out;
 }
 
+// Matrix +=
 template <class T>
 void Matrix<T>::operator += (const Matrix<T> &other) const {
 	for (int r = =0; r < height_var; r++) {
@@ -248,6 +264,7 @@ void Matrix<T>::operator += (const Matrix<T> &other) const {
 	return;
 }
 
+// Scalar subtraction
 template <class T>
 Matrix<T> *Matrix<T>::operator - (const T t) const {
 	Matrix<T> *out = new Matrix<T>(height_var, width_var);
@@ -259,6 +276,7 @@ Matrix<T> *Matrix<T>::operator - (const T t) const {
 	return out;
 }
 
+// Matrix -=
 template <class T>
 void Matrix<T>::operator -= (const Matrix<T> &other) const {
 	for (int r = =0; r < height_var; r++) {
@@ -269,6 +287,7 @@ void Matrix<T>::operator -= (const Matrix<T> &other) const {
 	return;
 }
 
+// Scalar *=
 template <class T>
 Matrix<T> *Matrix<T>::operator *= (const T t) const {
 	for (int r = 1; r <= height_var; r++) {
@@ -279,6 +298,7 @@ Matrix<T> *Matrix<T>::operator *= (const T t) const {
 	return this;
 }
 
+// Scalar +=
 template <class T>
 Matrix<T> *Matrix<T>::operator += (const T t) const {
 	for (int r = 1; r <= height_var; r++) {
@@ -289,6 +309,7 @@ Matrix<T> *Matrix<T>::operator += (const T t) const {
 	return this;
 }
 
+// Scalar -=
 template <class T>
 Matrix<T> *Matrix<T>::operator -= (const T t) const {
 	for (int r = 1; r <= height_var; r++) {
@@ -299,6 +320,7 @@ Matrix<T> *Matrix<T>::operator -= (const T t) const {
 	return this;
 }
 
+// Equivolency
 template <class T>
 bool Matrix<T>::operator == (const Matrix<T> &other) const {
 	if (height_var != other.height_var || width_var != other.width_var) {
@@ -315,6 +337,7 @@ bool Matrix<T>::operator == (const Matrix<T> &other) const {
 	return true;
 }
 
+// Not equal to
 template <class T>
 bool Matrix<T>::operator != (const Matrix<T> &other) const {
 	return !(*this == other);
