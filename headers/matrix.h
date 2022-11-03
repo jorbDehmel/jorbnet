@@ -4,6 +4,8 @@
 #include <iostream>
 using namespace std;
 
+/////////////////////////////////////////////////////////
+
 template <class T>
 class Matrix {
 public:
@@ -20,6 +22,8 @@ public:
 
 	void set(const int h, const int w, T data);
 	T get(const int h, const int w) const;
+
+	void naiveInplaceMultiply(const Matrix<T> &other);
 
 	Matrix<T> *operator * (const Matrix<T> &other) const;
 	Matrix<T> *operator * (const T t) const;
@@ -45,6 +49,8 @@ public:
 	T** arr;
 };
 
+/////////////////////////////////////////////////////////
+
 template <class T>
 ostream& operator << (ostream &stream, const Matrix<T> &m) {
 	stream << "[";
@@ -60,6 +66,8 @@ ostream& operator << (ostream &stream, const Matrix<T> &m) {
 	stream << "]\n";
 	return stream;
 }
+
+/////////////////////////////////////////////////////////
 
 template <class T>
 Matrix<T>::Matrix(int h, int w) {
@@ -98,6 +106,8 @@ Matrix<T>::~Matrix() {
 
 	return;
 }
+
+/////////////////////////////////////////////////////////
 
 template <class T>
 void Matrix<T>::print(ostream& out) const {
@@ -139,6 +149,23 @@ T Matrix<T>::get(const int h, const int w) const {
 		throw runtime_error("Invalid indices. Cannot get");
 	}
 }
+
+template <class T>
+void Matrix<T>::naiveInplaceMultiply(const Matrix<T> &other) {
+	if (other->height() == height() && other->width() == width()) {
+		for (int r = 0; r < height_var; r++) {
+			for (int c = 0; c < width_var; c++) {
+				arr[r][c] *= other->arr[r][c];
+			}
+		}
+	} else {
+		throw runtime_error("Dimensional mismatch. Cannot multiply");
+	}
+
+	return;
+}
+
+/////////////////////////////////////////////////////////
 
 template <class T>
 Matrix<T> *Matrix<T>::operator * (const Matrix<T> &other) const {
@@ -292,5 +319,7 @@ template <class T>
 bool Matrix<T>::operator != (const Matrix<T> &other) const {
 	return !(*this == other);
 }
+
+/////////////////////////////////////////////////////////
 
 #endif

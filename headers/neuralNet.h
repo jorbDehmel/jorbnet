@@ -3,6 +3,8 @@
 
 #include "layer.h"
 
+//
+
 void sigmoid(Matrix<double> *to_modify) {
     double x;
     for (int i = 1; i <= to_modify->height(); i++) {
@@ -86,11 +88,10 @@ Matrix<double> *MLP::getActivation() const {
 }
 
 void MLP::train(Matrix<double> &correct) {
-    Matrix<double> error = *(correct - *getActivation());
+    Matrix<double> deriv = *(correct - *getActivation()); // equals error rn
 
     // Iterate over layers
     for (int layer_num = layers - 1; layer_num >= 0; layer_num--) {
-        Matrix<double> deriv(*network[layer_num]->weights);
         
         // define deriv
         
