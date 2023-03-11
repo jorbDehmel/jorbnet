@@ -4,3 +4,11 @@ bin/
 logs/
 *.log
 .vscode/
+*.out
+*.exe
+old/
+*.aux
+*.fls
+*.log
+*.fdb_latexmk
+*.gz

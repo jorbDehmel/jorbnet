@@ -1,0 +1,73 @@
+\documentclass[8pt]{amsart}
+
+\usepackage{geometry}
+\geometry{letterpaper}
+
+\title{Machine Learning Outline}
+\author{Jordan E Dehmel}
+\date{}
+
+\begin{document}
+\maketitle
+
+Pseudocode for finding the derivative of some node with respect to
+some weight $w_k$:
+\begin{verbatim}
+if w_k is in links:
+    return links[w_k].previousActivation
+else:
+    out = 0
+    for link in links:
+        selfDer = (derivative of this with respect to link)
+        out += selfDer * (derivative of link with respect to w_k)
+    return out
+\end{verbatim}
+
+Anatomy of an error node:
+
+Method 1 (vector norm):
+$$
+\begin{aligned}
+    y &= \sqrt{\sum{(e_i - o_i)^2}} \\
+    \frac{\partial y}{\partial w_k} &= \frac{-\sum{(e_i - o_i)\frac{\partial o_i}{\partial w_k}}}{y}
+\end{aligned}
+$$
+
+Method 2 (easy derivative):
+$$
+\begin{aligned}
+    y &= \sum{(e_i - o_i)^2} \\
+    \frac{\partial y}{\partial w_k} &= -2 \sum{(e_i - o_i) \frac{\partial o_i}{\partial w_k}}
+\end{aligned}
+$$
+
+Anatomy of a regular node:
+
+Sigmoid $S$:
+$$
+\begin{aligned}
+    S(x) &= \frac{1}{1 + e^{-x}} \\
+    S'(x) &= S(x) (1 - S(x))
+\end{aligned}
+$$
+
+Sum $f$:
+$$
+\begin{aligned}
+    f(\vec{b}) &= \sum{v_i w_i} + b \\
+    \frac{\partial f(\vec{b})}{\partial w_k} &= \sum{w_i \frac{\partial v_i}{\partial w_k}}
+\end{aligned}
+$$
+(If $w_k$ is within its list of weights, the derivative will instead be equal to $v_i$)
+
+Full equation for a regular node:
+$$
+\begin{aligned}
+    y &= S(f(\vec{b})) \\
+    \frac{\partial y}{\partial s} &= S'(f(\vec{b}))(f'(\vec{b}))
+\end{aligned}
+$$
+With inputs $v_n$, weights $w_i$ and bias $b$.
+Partial derivative taken with respect to later weight $s$.
+
+\end{document}
