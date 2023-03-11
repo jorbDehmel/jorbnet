@@ -70,4 +70,12 @@ $$
 With inputs $v_n$, weights $w_i$ and bias $b$.
 Partial derivative taken with respect to later weight $s$.
 
+The error dummy node represents a function of $N$ variables, where $N$ is the
+number of weights in the network. To perform gradient descent on the error, we
+must of course find the gradient. This is a vector of $N$ dimensions where the
+$i$th entry is the derivative of the error with respect to the $i$th weight.
+Once the gradient is found, we will move some amount backwards in its direction.
+This amounts to decrementing each weight by its corrosponding gradient entry
+times some scalar.
+
 \end{document}

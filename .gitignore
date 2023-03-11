@@ -12,3 +12,4 @@ old/
 *.log
 *.fdb_latexmk
 *.gz
+*.pdf
