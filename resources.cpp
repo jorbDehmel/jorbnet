@@ -275,7 +275,7 @@ void network::backprop(const int Index)
     {
         if (magnitude != 0)
         {
-            *weights[i] -= (gradient[i] / magnitude) * STEP_SIZE;
+            *weights[i] -= (gradient[i] / magnitude) * drand(MIN_STEP_SIZE, MAX_STEP_SIZE);
         }
     }
 
