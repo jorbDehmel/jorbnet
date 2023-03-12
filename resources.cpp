@@ -237,14 +237,8 @@ void network::backprop(const int Index)
         data = &trainingData[Index];
     }
 
-    // Find error and observed
+    // Find observed
     vector<double> observed = propogate(data->inputs);
-    double error = err(observed, data->expected);
-    if (passes % LOG_INTERVAL == 0)
-    {
-        errors.push_back(error);
-        cout << "(" << passes << ", " << error << ")\n";
-    }
 
     // Construct gradient error vector w/ respect to each weight
     vector<double> gradient;
@@ -292,6 +286,19 @@ void network::train(const int NumTimes)
         backprop(-1);
         auto end = chrono::high_resolution_clock::now();
         totalNS += chrono::duration_cast<chrono::milliseconds>(end - start).count();
+
+        if (passes % LOG_INTERVAL == 0)
+        {
+            double error = 0;
+            for (auto set : trainingData)
+            {
+                auto observed = propogate(set.inputs);
+                error += err(observed, set.expected);
+            }
+
+            errors.push_back(error);
+            cout << "(" << passes << ", " << error << ")\n";
+        }
     }
 
     cout << "Total ms: " << totalNS << '\n'

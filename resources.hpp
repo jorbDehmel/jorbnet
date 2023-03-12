@@ -12,7 +12,7 @@ using namespace std;
 #define WEIGHT_VARIATION 5
 #define MIN_STEP_SIZE 0.01
 #define MAX_STEP_SIZE 0.5
-#define LOG_INTERVAL 100
+#define LOG_INTERVAL 10
 
 struct node
 {

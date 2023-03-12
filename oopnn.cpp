@@ -1,12 +1,20 @@
 #include <iostream>
 #include "resources.hpp"
 #include "jgraph/jgraph.hpp"
+#include "networkSave.hpp"
 using namespace std;
 
 vector<pair<double, double>> dataToGraph;
 int item = 0;
 bool graph(double &X, double &Y)
 {
+    // Failsafe
+    if (dataToGraph.size() <= 1)
+    {
+        X = Y = 0;
+        return false;
+    }
+
     if (item >= dataToGraph.size())
     {
         item = 0;
@@ -22,26 +30,48 @@ bool graph(double &X, double &Y)
 
 int main()
 {
+    srand(time(NULL));
+
     // Trained to be a XOR and an AND gate
     dataset a;
     a.inputs = {0, 0};
     a.expected = {1, 0};
 
     dataset b;
-    b.inputs = {1, 1};
-    b.expected = {0, 1};
+    b.inputs = {0, 1};
+    b.expected = {0, 0};
 
-    srand(time(NULL));
-    vector<int> sizes = {2, 2, 5, 2, 2};
+    dataset c;
+    c.inputs = {1, 0};
+    c.expected = {0, 0};
+
+    dataset d;
+    d.inputs = {1, 1};
+    d.expected = {1, 1};
+
+    vector<int> sizes = {2, 12, 2};
     network n(sizes);
-    n.trainingData = {a, b};
+    n.trainingData = {a, b, c, d};
 
-    n.train(10000);
+    n.train(1000);
 
+    double min = 1000000;
+    double max = -1;
     for (auto e : n.errors)
     {
+        if (e < min)
+        {
+            min = e;
+        }
+        if (e > max)
+        {
+            max = e;
+        }
+
         dataToGraph.push_back(pair<double, double>(dataToGraph.size(), e));
     }
+    cout << "Minimal error: " << min << '\n'
+         << "Maximal error: " << max << '\n';
 
     for (auto data : n.trainingData)
     {
@@ -56,7 +86,7 @@ int main()
     LineGraph g;
 
     jgraph::UPSCALING_X = jgraph::UPSCALING_Y = 2;
-    jgraph::XMIN = jgraph::YMIN = -10;
+    jgraph::XMIN = jgraph::YMIN = -1;
     jgraph::XMAX = dataToGraph.size() - 1;
     jgraph::YMAX = 5;
     jgraph::TICK_SPACING_X = dataToGraph.size() / 10;
@@ -64,6 +94,8 @@ int main()
     g.equations.push_back(graph);
     g.refresh();
     mainLoop(&g);
+
+    saveNetwork("hi.nn", n);
 
     return 0;
 }

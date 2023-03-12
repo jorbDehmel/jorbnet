@@ -13,3 +13,4 @@ old/
 *.fdb_latexmk
 *.gz
 *.pdf
+*.nn
