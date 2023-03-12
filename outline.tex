@@ -78,4 +78,11 @@ Once the gradient is found, we will move some amount backwards in its direction.
 This amounts to decrementing each weight by its corrosponding gradient entry
 times some scalar.
 
+\section{Stochastic Gradient Descent}
+
+This above method has a low rate of convergence. This can be fixed by
+introducing an aspect of randomness to our gradient descent. Instead of only
+using the unit gradient vector, we can use this times some random icrement. This
+allows it to jump out of local error minima in the pursuit of global minima.
+
 \end{document}
