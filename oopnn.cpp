@@ -4,7 +4,7 @@
 #include "networkSave.hpp"
 using namespace std;
 
-vector<pair<double, double>> dataToGraph;
+vector<double> dataToGraph;
 int item = 0;
 bool graph(double &X, double &Y)
 {
@@ -21,8 +21,8 @@ bool graph(double &X, double &Y)
         return false;
     }
 
-    X = dataToGraph[item].first;
-    Y = dataToGraph[item].second;
+    X = item;
+    Y = dataToGraph[item];
 
     item++;
     return true;
@@ -49,11 +49,13 @@ int main()
     d.inputs = {1, 1};
     d.expected = {1, 1};
 
-    vector<int> sizes = {2, 12, 2};
+    vector<int> sizes = {2, 10, 2};
+
     network n(sizes);
+
     n.trainingData = {a, b, c, d};
 
-    n.train(1000);
+    n.train(10000);
 
     double min = 1000000;
     double max = -1;
@@ -68,7 +70,7 @@ int main()
             max = e;
         }
 
-        dataToGraph.push_back(pair<double, double>(dataToGraph.size(), e));
+        dataToGraph.push_back(e);
     }
     cout << "Minimal error: " << min << '\n'
          << "Maximal error: " << max << '\n';

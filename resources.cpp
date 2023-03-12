@@ -298,6 +298,12 @@ void network::train(const int NumTimes)
 
             errors.push_back(error);
             cout << "(" << passes << ", " << error << ")\n";
+
+            if (error < ERROR_BREAK)
+            {
+                cout << "Error break activated after " << passes << ".\n";
+                break;
+            }
         }
     }
 
