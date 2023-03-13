@@ -10,6 +10,15 @@
 \begin{document}
 \maketitle
 
+\section{Gradient Descent}
+
+We seek to change the weights and biases of each node to reduce the
+global error of the network. An easy way to do this is **gradient descent**.
+We must first calculate the gradient vector of the error with respect to
+each weight. By the definition of a gradient, each entry of this vector will
+be equal to the partial derivative of the error with respect to some weight,
+which will be calculated via the chain rule for partial derivatives.
+
 Pseudocode for finding the derivative of some node with respect to
 some weight $w_k$:
 \begin{verbatim}

@@ -7,24 +7,43 @@ double drand(const double &Min, const double &Max)
     return out;
 }
 
-void initNode(node &out, node *Links, const int &NumLinks)
+void initNode(node &Out, node *Links, const int &NumLinks)
 {
-    out.act = 0;
-    out.bias = drand(-WEIGHT_VARIATION, WEIGHT_VARIATION);
-    out.weights = new double[NumLinks];
-    assert(out.weights != nullptr);
+    Out.act = 0;
+    Out.bias = drand(-WEIGHT_VARIATION, WEIGHT_VARIATION);
+    Out.weights = new double[NumLinks];
+    assert(Out.weights != nullptr);
     for (int i = 0; i < NumLinks; i++)
     {
-        out.links.push_back(Links + i);
-        out.weights[i] = drand(-WEIGHT_VARIATION, WEIGHT_VARIATION);
+        Out.links.push_back(Links + i);
+        Out.weights[i] = drand(-WEIGHT_VARIATION, WEIGHT_VARIATION);
     }
-    out.wIndex = -1;
+    Out.wIndex = -1;
+    return;
+}
+
+void cloneNode(node &To, const node &From, node *Links, const int &NumLinks)
+{
+    To.act = From.act;
+    To.bias = From.bias;
+
+    To.weights = new double[NumLinks];
+    assert(To.weights != nullptr);
+
+    for (int i = 0; i < From.links.size(); i++)
+    {
+        To.links.push_back(Links + i);
+        To.weights[i] = From.weights[i];
+    }
+    To.wIndex = From.wIndex;
     return;
 }
 
 void freeNode(node *What)
 {
+    cout << "Called freenode\n";
     delete[] What->weights;
+    cout << "skeebidee deebop\n";
     return;
 }
 
@@ -113,6 +132,12 @@ double bprop(node &What, double *For, map<node *, double> &Found)
         }
     }
 
+    if (&What.bias == For)
+    {
+        Found[&What] = myDer;
+        return Found[&What];
+    }
+
     // Otherwise, the weight is not directly connected to this node.
     // We will have to do this the hard way.
     // This looks like it could be combined with the above for loop,
@@ -170,7 +195,51 @@ network::network(const vector<int> &Sizes)
             {
                 weights.push_back(&nodes[i][j].weights[k]);
             }
+            weights.push_back(&nodes[i][j].bias);
         }
+    }
+
+    return;
+}
+
+network::network(const network &Other)
+{
+    for (auto i : Other.sizes)
+    {
+        sizes.push_back(i);
+    }
+
+    // Create network
+    nodes = new node *[sizes.size()];
+    assert(nodes != nullptr);
+
+    for (int i = 0; i < sizes.size(); i++)
+    {
+        nodes[i] = new node[sizes[i]];
+        assert(nodes[i] != nullptr);
+    }
+
+    // Link nodes
+    for (int i = 1; i < sizes.size(); i++)
+    {
+        for (int j = 0; j < sizes[i]; j++)
+        {
+            cloneNode(nodes[i][j], Other.nodes[i][j], nodes[i - 1], sizes[i - 1]);
+            for (int k = 0; k < Other.nodes[i][j].links.size(); k++)
+            {
+                assert(nodes[i][j].weights[k] == Other.nodes[i][j].weights[k]);
+                assert(&nodes[i][j].weights[k] != &Other.nodes[i][j].weights[k]);
+
+                weights.push_back(&nodes[i][j].weights[k]);
+            }
+            weights.push_back(&nodes[i][j].bias);
+        }
+    }
+
+    // Copy training data
+    for (auto d : Other.trainingData)
+    {
+        trainingData.push_back(d);
     }
 
     return;
@@ -178,6 +247,8 @@ network::network(const vector<int> &Sizes)
 
 network::~network()
 {
+    cout << "sdflksjdflksjdflskjdf\n";
+
     // Delete network
     for (int i = 0; i < sizes.size(); i++)
     {

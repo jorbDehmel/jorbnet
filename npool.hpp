@@ -1,0 +1,29 @@
+/*
+Jordan "Jorb" Dehmel
+jdehmel@outlook.com
+github.com/jorbDehmel
+2023 - present
+MIT licence via mit-license.org held by author
+*/
+
+#ifndef NPOOL_HPP
+#define NPOOL_HPP
+
+#include "resources.hpp"
+#include "networkSave.hpp"
+using namespace std;
+
+class npool
+{
+public:
+    npool(network &Starter, const int &Num, const int &Cull, const int &CullInterval);
+    ~npool();
+
+    int cull, cullInterval, passes, num;
+    double minVar = 1;
+    network **networks;
+
+    void train(const int &Num);
+};
+
+#endif

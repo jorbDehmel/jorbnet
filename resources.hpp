@@ -10,9 +10,9 @@
 using namespace std;
 
 #define WEIGHT_VARIATION 5
-#define MIN_STEP_SIZE 0.01
+#define MIN_STEP_SIZE 0.1
 #define MAX_STEP_SIZE 1
-#define LOG_INTERVAL 10
+#define LOG_INTERVAL 100
 
 #define ERROR_BREAK 0.01
 
@@ -37,6 +37,7 @@ double drand(const double &Min, const double &Max);
 
 void initNode(node &out, node *Links, const int &NumLinks);
 void freeNode(node *What);
+void cloneNode(node &To, const node &From, node *Links, const int &NumLinks);
 
 double wsum(const node &What);
 double sig(const double &X);
@@ -54,6 +55,7 @@ class network
 {
 public:
     network(const vector<int> &Sizes);
+    network(const network &Other);
     ~network();
 
     vector<double> propogate(vector<double> &Input);
