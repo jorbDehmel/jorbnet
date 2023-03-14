@@ -8,8 +8,10 @@ STEM = clang++ -pedantic -Wall -Werror -g
 #####################################################
 
 install: /usr/include/jgraph libjorbnet.a /usr/bin/jorbnet-flags docs
-	sudo cp -r . /usr/include/jorbnet
-
+	sudo mkdir -p /usr/include/jorbnet/src
+	sudo cp -rf src/*.hpp /usr/include/jorbnet/src
+	sudo cp -f libjorbnet.a /usr/include/jorbnet
+	
 #####################################################
 
 libjorbnet.a: build/npool.o build/resources.o build/networkSave.o
