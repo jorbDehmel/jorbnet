@@ -251,9 +251,13 @@ network::network(const network &Other)
     }
 
     // Copy error
-    for (int i = Other.errors.size() - 10; i < Other.errors.size(); i++)
+    for (int i = Other.errors.size() * 0.5; i < Other.errors.size(); i++)
     {
         errors.push_back(Other.errors[i]);
+    }
+    if (errors.size() == 0)
+    {
+        errors.push_back(99999);
     }
 
     return;
@@ -365,13 +369,9 @@ void network::backprop(const int Index)
 
 void network::train(const int NumTimes)
 {
-    long long totalNS = 0;
     for (int i = 0; i < NumTimes; i++)
     {
-        auto start = chrono::high_resolution_clock::now();
         backprop(-1);
-        auto end = chrono::high_resolution_clock::now();
-        totalNS += chrono::duration_cast<chrono::milliseconds>(end - start).count();
 
         if (passes % LOG_INTERVAL == 0)
         {
@@ -383,18 +383,22 @@ void network::train(const int NumTimes)
             }
 
             errors.push_back(error);
-            cout << "(" << passes << ", " << error << ")\n";
 
             if (error < ERROR_BREAK)
             {
-                cout << "Error break activated after " << passes << ".\n";
                 break;
             }
         }
     }
 
-    cout << "Total ms: " << totalNS << '\n'
-         << "Average ms per pass: " << totalNS / (double)passes << '\n';
+    double error = 0;
+    for (auto set : trainingData)
+    {
+        auto observed = propogate(set.inputs);
+        error += err(observed, set.expected);
+    }
+    errors.push_back(error);
+
     return;
 }
 
@@ -404,6 +408,12 @@ int __graphItem;
 // This will halt execution until the graph is closed
 void graphNetworkError(const network &What)
 {
+    if (What.errors.size() < 10)
+    {
+        cout << "Cannot graph network with less than 10 error values.\n";
+        return;
+    }
+
     __graphItem = 0;
     __graphData.clear();
 

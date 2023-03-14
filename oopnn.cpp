@@ -55,49 +55,20 @@ int main()
 
     n.trainingData = {a, b, c, d};
 
-    n.train(10000);
+    auto start = chrono::high_resolution_clock::now();
+    n.train(1000);
+    auto end = chrono::high_resolution_clock::now();
 
-    double min = 1000000;
-    double max = -1;
-    for (auto e : n.errors)
-    {
-        if (e < min)
-        {
-            min = e;
-        }
-        if (e > max)
-        {
-            max = e;
-        }
+    int ellapsed = chrono::duration_cast<chrono::nanoseconds>(end - start).count();
+    double lastError = n.errors.back();
+    double errorNs = ellapsed * lastError;
 
-        dataToGraph.push_back(e);
-    }
-    cout << "Minimal error: " << min << '\n'
-         << "Maximal error: " << max << '\n';
+    cout << "Ellapsed ns: " << ellapsed << '\n'
+         << "Final error: " << lastError << '\n'
+         << "Network error-NS evaluation: " << errorNs << '\n';
 
-    for (auto data : n.trainingData)
-    {
-        auto observed = n.propogate(data.inputs);
-        for (int i = 0; i < observed.size(); i++)
-        {
-            cout << observed[i] << " (" << (int)(observed[i] + 0.5) << ") (r " << data.expected[i] << ")\t";
-        }
-        cout << '\n';
-    }
-
-    LineGraph g;
-
-    jgraph::UPSCALING_X = jgraph::UPSCALING_Y = 2;
-    jgraph::XMIN = jgraph::YMIN = -1;
-    jgraph::XMAX = dataToGraph.size() - 1;
-    jgraph::YMAX = 5;
-    jgraph::TICK_SPACING_X = dataToGraph.size() / 10;
-
-    g.equations.push_back(graph);
-    g.refresh();
-    mainLoop(&g);
-
-    saveNetwork("hi.nn", n);
+    // graphNetworkError(n);
+    // saveNetwork("hi.nn", n);
 
     return 0;
 }

@@ -66,7 +66,6 @@ void npool::train(const int &NumTimes)
 
         for (int n = 0; n < num; n++)
         {
-            // networks[n]->train(cullInterval);
             threads[n] = new thread(__threadTrain, networks[n], cullInterval);
             assert(threads[n] != nullptr);
         }
@@ -84,14 +83,14 @@ void npool::train(const int &NumTimes)
         int size = num;
         while (size > num - cull)
         {
-            int indexOfLeastAccurate = -1;
-            for (int j = 0; j < num; j++)
+            int indexOfLeastAccurate = 0;
+            for (int j = 1; j < num; j++)
             {
                 if (networks[j] == nullptr)
                 {
                     continue;
                 }
-                else if (indexOfLeastAccurate == -1)
+                else if (networks[indexOfLeastAccurate] == nullptr)
                 {
                     indexOfLeastAccurate = j;
                 }
@@ -100,7 +99,7 @@ void npool::train(const int &NumTimes)
                     indexOfLeastAccurate = j;
                 }
             }
-            assert(indexOfLeastAccurate != -1);
+            assert(networks[indexOfLeastAccurate] != nullptr);
 
             delete networks[indexOfLeastAccurate];
             networks[indexOfLeastAccurate] = nullptr;
@@ -169,8 +168,6 @@ network npool::best()
             indexOfBest = i;
         }
     }
-
-    assert(indexOfBest != -1);
-
+    assert(networks[indexOfBest] != nullptr);
     return *networks[indexOfBest];
 }

@@ -99,13 +99,72 @@ allows it to jump out of local error minima in the pursuit of global minima.
 Even using stochastic gradient descent, networks will only sometimes converge.
 This happens when the gradient finds itself stuck in a local error minima that is
 too deep to escape from, even through stochastic means. Thus, we introduce
-network pools and pruning.
+network pools and pruning, two heuristic methods of network improvement.
 
 A **network pool** holds several clones of a network. It trains all of these on
 seperate threads, and checks in periodically. At each check, it **prunes** some
 number of the worst-performing networks (deletes them). It then repopulates the
 pool with clones of the best-performing network. During the cloning process, all
 the weights in the clone are modified by some random amount to shove their
-error gradients out of local minima.
+error gradients out of local minima. This is also beneficial due to its multi-
+threading, which allows capable machines to gain better improvements in network
+accuracy over shorter periods of time. A good unit for the measurement of this
+is thus the error-nanosecond, computed as the product of the final network error
+and the ellapsed nanoseconds of training, where a lower number is better.
+
+These methods constitute a heuristic because the random modulation of weights
+may not neccessarily improve the network's error. If an ideal network is found
+as the root of the pool, there is no point in the cloning and modulating process.
+However, this is much less likely to occur than local error minima.
+
+\section{Error-NS}
+
+We will apply our Error-NS measurement to the regular and network pool training
+methods for a 2/10/2 network training to emulate a XOR and AND gate. The network
+pool had a pool size of 10 with a pruning rate of \%70 every 10 passes. Both
+networks began randomized and trained for 1000 passes.
+
+\subsection{Trial 1}
+
+The regular training method failed to converge.
+Regular Error-NS: 3.51 e9
+Pool Error-NS: 1.42 e-26
+Ratio of pool to regular: 2.47 e35 (35 orders of magnitude)
+
+\subsection{Trial 2}
+
+The regular training method yielded a high error rate.
+Regular Error-NS: 3.05 e9
+Pool Error-NS: 2.74 e-49
+Ratio of pool to regular: 1.11 e58 (58 orders of magnitude)
+
+\subsection{Trial 3}
+
+The regular training method yielded a high error rate.
+Regular Error-NS: 2.00 e9
+Pool Error-NS: 3.78 e-51
+Ratio of pool to regular: 5.29 e59 (59 orders of magnitude)
+
+\subsection{Trial 4}
+
+The regular training method failed to converge.
+Regular Error-NS: 3.78 e9
+Pool Error-NS: 1.14 e-33
+Ratio of pool to regular: 3.31 e42 (42 orders of magnitude)
+
+\subsection{Trial 5}
+
+The regular training method failed to converge.
+Regular Error-NS: 3.69 e9
+Pool Error-NS: 2.33 e-69
+Ratio of pool to regular: 1.58 e78 (78 orders of magniture)
+
+\section{Analysis}
+
+Although it seems unfair to compare this dataset, upon which the regular
+training process converged properly 0 times, this is representative and
+sequentially recorded data. Note that these tests were run on a low-end
+converted chromebook with only 4 threads. On a better machine, the
+network pool would perform even better due to its abaility to be multithreaded.
 
 \end{document}
