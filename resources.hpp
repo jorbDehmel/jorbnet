@@ -7,6 +7,7 @@
 #include <vector>
 #include <chrono>
 #include <cassert>
+#include "jgraph/jgraph.hpp"
 using namespace std;
 
 #define WEIGHT_VARIATION 5
@@ -71,5 +72,12 @@ public:
     vector<double> errors;
     int passes = 0;
 };
+
+// This will halt execution until the graph is closed
+void graphNetworkError(const network &What);
+
+extern vector<double> __graphData;
+extern int __graphItem;
+bool __graphErrorHelper(double &X, double &Y);
 
 #endif

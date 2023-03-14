@@ -397,3 +397,60 @@ void network::train(const int NumTimes)
          << "Average ms per pass: " << totalNS / (double)passes << '\n';
     return;
 }
+
+vector<double> __graphData;
+int __graphItem;
+
+// This will halt execution until the graph is closed
+void graphNetworkError(const network &What)
+{
+    __graphItem = 0;
+    __graphData.clear();
+
+    double max = -1;
+    for (auto e : What.errors)
+    {
+        __graphData.push_back(e);
+
+        if (e > max)
+        {
+            max = e;
+        }
+    }
+
+    LineGraph g;
+
+    jgraph::UPSCALING_X = jgraph::UPSCALING_Y = 2;
+    jgraph::XMIN = jgraph::YMIN = -1;
+    jgraph::XMAX = __graphData.size() - 1;
+    jgraph::YMAX = 5;
+    jgraph::TICK_SPACING_X = __graphData.size() / 10;
+
+    g.equations.push_back(__graphErrorHelper);
+    g.refresh();
+    mainLoop(&g);
+
+    return;
+}
+
+bool __graphErrorHelper(double &X, double &Y)
+{
+    // Failsafe
+    if (__graphData.size() <= 1)
+    {
+        X = Y = 0;
+        return false;
+    }
+
+    if (__graphItem >= __graphData.size())
+    {
+        __graphItem = 0;
+        return false;
+    }
+
+    X = __graphItem;
+    Y = __graphData[__graphItem];
+
+    __graphItem++;
+    return true;
+}
