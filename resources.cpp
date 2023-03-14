@@ -11,6 +11,7 @@ void initNode(node &Out, node *Links, const int &NumLinks)
 {
     Out.act = 0;
     Out.bias = drand(-WEIGHT_VARIATION, WEIGHT_VARIATION);
+    Out.weights = nullptr;
     Out.weights = new double[NumLinks];
     assert(Out.weights != nullptr);
     for (int i = 0; i < NumLinks; i++)
@@ -27,13 +28,15 @@ void cloneNode(node &To, const node &From, node *Links, const int &NumLinks)
     To.act = From.act;
     To.bias = From.bias;
 
+    To.weights = nullptr;
     To.weights = new double[NumLinks];
     assert(To.weights != nullptr);
 
     for (int i = 0; i < From.links.size(); i++)
     {
         To.links.push_back(Links + i);
-        To.weights[i] = From.weights[i];
+        double temp = From.weights[i];
+        To.weights[i] = temp;
     }
     To.wIndex = From.wIndex;
     return;
@@ -41,9 +44,10 @@ void cloneNode(node &To, const node &From, node *Links, const int &NumLinks)
 
 void freeNode(node *What)
 {
-    cout << "Called freenode\n";
-    delete[] What->weights;
-    cout << "skeebidee deebop\n";
+    if (What->weights != nullptr)
+    {
+        delete[] What->weights;
+    }
     return;
 }
 
@@ -101,10 +105,10 @@ double mag(vector<double> &What)
 }
 
 // Get the derivative of a single node with respect to some weight 'For'
-double bprop(node &What, double *For, map<node *, double> &Found)
+double bprop(node &What, double *For, map<node *, double> &FoundWeights, map<node *, double> &FoundGenerals)
 {
     // Safeguard against recalculating
-    if (Found.count(&What) != 0)
+    if (FoundWeights.count(&What) != 0)
     {
         // Word salad if I've ever heard it
         throw runtime_error("Auxilery derivative map safeguard failed");
@@ -113,13 +117,17 @@ double bprop(node &What, double *For, map<node *, double> &Found)
     // Safeguard against reaching the input without dependancy on the weight
     if (What.links.size() == 0)
     {
-        Found[&What] = 0;
+        FoundWeights[&What] = 0;
         return 0;
     }
 
     // This will be multiplied by everything for the chain rule
     // Equal to sigmoid prime via previous activations
-    double myDer = What.act * (1 - What.act);
+    if (FoundGenerals.count(&What) == 0)
+    {
+        FoundGenerals[&What] = What.act * (1 - What.act);
+    }
+    double myDer = FoundGenerals[&What];
 
     // If the weight is connected to this node, the derivative is equal
     // to the previous activation of the node linked to it
@@ -127,15 +135,15 @@ double bprop(node &What, double *For, map<node *, double> &Found)
     {
         if (&What.weights[i] == For)
         {
-            Found[&What] = myDer * What.links[i]->act;
-            return Found[&What];
+            FoundWeights[&What] = myDer * What.links[i]->act;
+            return FoundWeights[&What];
         }
     }
 
     if (&What.bias == For)
     {
-        Found[&What] = myDer;
-        return Found[&What];
+        FoundWeights[&What] = myDer;
+        return FoundWeights[&What];
     }
 
     // Otherwise, the weight is not directly connected to this node.
@@ -147,20 +155,20 @@ double bprop(node &What, double *For, map<node *, double> &Found)
     for (int i = 0; i < What.links.size(); i++)
     {
         // If this node has already been done, use that result
-        if (Found.count(What.links[i]) != 0)
+        if (FoundWeights.count(What.links[i]) != 0)
         {
-            out += What.weights[i] * Found[What.links[i]];
+            out += What.weights[i] * FoundWeights[What.links[i]];
         }
 
         // Otherwise, compute it for the first time
         else
         {
-            auto temp = What.weights[i] * bprop(*What.links[i], For, Found);
+            auto temp = What.weights[i] * bprop(*What.links[i], For, FoundWeights, FoundGenerals);
             out += temp;
         }
     }
     out *= myDer;
-    Found[&What] = out;
+    FoundWeights[&What] = out;
 
     // cout << "Node " << &What << " has derivative " << out << " wrt " << &For << '\n';
 
@@ -242,15 +250,19 @@ network::network(const network &Other)
         trainingData.push_back(d);
     }
 
+    // Copy error
+    for (int i = Other.errors.size() - 10; i < Other.errors.size(); i++)
+    {
+        errors.push_back(Other.errors[i]);
+    }
+
     return;
 }
 
 network::~network()
 {
-    cout << "sdflksjdflksjdflskjdf\n";
-
     // Delete network
-    for (int i = 0; i < sizes.size(); i++)
+    for (int i = 1; i < sizes.size(); i++)
     {
         for (int j = 0; j < sizes[i]; j++)
         {
@@ -297,6 +309,8 @@ vector<double> network::propogate(vector<double> &Input)
 // -1 for random
 void network::backprop(const int Index)
 {
+    assert(trainingData.size() > 0);
+
     // Select training data
     dataset *data;
     if (Index < 0 || Index >= trainingData.size())
@@ -313,6 +327,7 @@ void network::backprop(const int Index)
 
     // Construct gradient error vector w/ respect to each weight
     vector<double> gradient;
+    map<node *, double> foundGenerals;
     for (double *weight : weights)
     {
         // Get the derivative of the error function
@@ -320,11 +335,11 @@ void network::backprop(const int Index)
 
         // Sum
         double der = 0;
-        map<node *, double> found;
+        map<node *, double> foundWeights;
         for (int i = 0; i < observed.size(); i++)
         {
             // Sum of err times derivative of each output node
-            der -= 2 * (data->expected[i] - observed[i]) * bprop(nodes[sizes.size() - 1][i], weight, found);
+            der -= 2 * (data->expected[i] - observed[i]) * bprop(nodes[sizes.size() - 1][i], weight, foundWeights, foundGenerals);
         }
 
         // cout << "Entry " << gradient.size() << '\t' << der << '\n';

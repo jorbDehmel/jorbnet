@@ -24,6 +24,7 @@ public:
     network **networks;
 
     void train(const int &Num);
+    network best();
 };
 
 #endif

@@ -49,7 +49,7 @@ double err(vector<double> &Obs, vector<double> &Exp);
 double mag(vector<double> &What);
 
 // Get the derivative of a single node with respect to some weight 'For'
-double bprop(node &What, double *For, map<node *, double> &Found);
+double bprop(node &What, double *For, map<node *, double> &FoundWeights, map<node *, double> &FoundGenerals);
 
 class network
 {

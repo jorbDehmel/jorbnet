@@ -15,7 +15,7 @@ npool::npool(network &Starter, const int &Num, const int &Cull, const int &CullI
     passes = 0;
     num = Num;
 
-    networks = new network *[Num];
+    networks = new network *[num];
     assert(networks != nullptr);
 
     networks[0] = new network(Starter);
@@ -54,15 +54,11 @@ void npool::train(const int &NumTimes)
 {
     for (int i = 0; i < NumTimes; i += cullInterval)
     {
-        cout << "Training...\n";
         for (int n = 0; n < num; n++)
         {
             assert(networks[n] != nullptr);
-            cout << "Training network " << n << '\n';
             networks[n]->train(cullInterval);
         }
-
-        cout << "Culling...\n";
 
         // Cull
         int size = num;
@@ -85,15 +81,12 @@ void npool::train(const int &NumTimes)
                 }
             }
             assert(indexOfLeastAccurate != -1);
-            cout << "Culling network " << indexOfLeastAccurate << "\taddress " << networks[indexOfLeastAccurate] << '\n';
 
             delete networks[indexOfLeastAccurate];
             networks[indexOfLeastAccurate] = nullptr;
 
             size--;
         }
-
-        cout << "Culled.\n";
 
         // Find best
         int indexOfMostAccurate = 0;
@@ -123,13 +116,41 @@ void npool::train(const int &NumTimes)
             else
             {
                 networks[j] = new network(*networks[indexOfMostAccurate]);
+                assert(networks[j] != nullptr);
                 for (auto w : networks[j]->weights)
                 {
                     *w += drand(-WEIGHT_VARIATION, WEIGHT_VARIATION);
                 }
             }
         }
-        cout << "Repopulated.\n";
     }
     return;
+}
+
+network npool::best()
+{
+    int indexOfBest = 0;
+    for (int i = 1; i < num; i++)
+    {
+        if (networks[i] == nullptr)
+        {
+            continue;
+        }
+        else if (networks[i]->errors.size() == 0)
+        {
+            continue;
+        }
+        else if (networks[indexOfBest] == nullptr)
+        {
+            indexOfBest = i;
+        }
+        else if (networks[i]->errors.back() < networks[indexOfBest]->errors.back())
+        {
+            indexOfBest = i;
+        }
+    }
+
+    assert(indexOfBest != -1);
+
+    return *networks[indexOfBest];
 }
