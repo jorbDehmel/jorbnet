@@ -50,15 +50,35 @@ npool::~npool()
     return;
 }
 
+void __threadTrain(network *ToCall, const int &TrainFor)
+{
+    ToCall->train(TrainFor);
+    return;
+}
+
 void npool::train(const int &NumTimes)
 {
     for (int i = 0; i < NumTimes; i += cullInterval)
     {
+        // Start training
+        thread **threads = new thread *[num];
+        assert(threads != nullptr);
+
         for (int n = 0; n < num; n++)
         {
-            assert(networks[n] != nullptr);
-            networks[n]->train(cullInterval);
+            // networks[n]->train(cullInterval);
+            threads[n] = new thread(__threadTrain, networks[n], cullInterval);
+            assert(threads[n] != nullptr);
         }
+
+        // Join threads
+        for (int n = 0; n < num; n++)
+        {
+            threads[n]->join();
+            delete threads[n];
+        }
+
+        delete[] threads;
 
         // Cull
         int size = num;

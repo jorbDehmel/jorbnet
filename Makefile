@@ -9,7 +9,7 @@ npool.out:	poolmain.cpp npool.o resources.o networkSave.o
 	$(STEM) -o npool.out poolmain.cpp npool.o networkSave.o resources.o `jgraph-flags`
 
 npool.o:	npool.hpp npool.cpp
-	$(STEM) -c -o npool.o npool.cpp
+	$(STEM) -c -o npool.o npool.cpp -pthread
 
 resources.o:	resources.hpp resources.cpp
 	$(STEM) -c -o resources.o resources.cpp

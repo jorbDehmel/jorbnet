@@ -6,7 +6,7 @@ int main()
 {
     network n = loadNetwork("hi.nn");
     npool p(n, 10, 7, 10);
-    p.train(20);
+    p.train(200);
     graphNetworkError(p.best());
 
     return 0;

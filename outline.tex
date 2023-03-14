@@ -94,4 +94,18 @@ introducing an aspect of randomness to our gradient descent. Instead of only
 using the unit gradient vector, we can use this times some random icrement. This
 allows it to jump out of local error minima in the pursuit of global minima.
 
+\section{The Network Pool and Periodic Pruning}
+
+Even using stochastic gradient descent, networks will only sometimes converge.
+This happens when the gradient finds itself stuck in a local error minima that is
+too deep to escape from, even through stochastic means. Thus, we introduce
+network pools and pruning.
+
+A **network pool** holds several clones of a network. It trains all of these on
+seperate threads, and checks in periodically. At each check, it **prunes** some
+number of the worst-performing networks (deletes them). It then repopulates the
+pool with clones of the best-performing network. During the cloning process, all
+the weights in the clone are modified by some random amount to shove their
+error gradients out of local minima.
+
 \end{document}

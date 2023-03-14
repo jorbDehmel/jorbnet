@@ -11,6 +11,7 @@ MIT licence via mit-license.org held by author
 
 #include "resources.hpp"
 #include "networkSave.hpp"
+#include <thread>
 using namespace std;
 
 class npool
