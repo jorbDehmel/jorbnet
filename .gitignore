@@ -1,12 +1,14 @@
 objs/
+build/
 bin/
-*.o
-logs/
-*.log
 .vscode/
+logs/
+old/
+
+*.o
+*.log
 *.out
 *.exe
-old/
 *.aux
 *.fls
 *.log
@@ -14,3 +16,4 @@ old/
 *.gz
 *.pdf
 *.nn
+*.objs

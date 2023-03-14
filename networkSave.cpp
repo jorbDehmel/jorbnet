@@ -1,3 +1,11 @@
+/*
+Jordan "Jorb" Dehmel
+jdehmel@outlook.com
+github.com/jorbDehmel
+2023 - present
+GPLv3 held by author
+*/
+
 #include "networkSave.hpp"
 
 void saveNetwork(const string &Filename, network &From)
