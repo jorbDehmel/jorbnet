@@ -17,3 +17,4 @@ old/
 *.pdf
 *.nn
 *.objs
+*.a

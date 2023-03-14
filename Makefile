@@ -1,15 +1,19 @@
 # NOTICE: This library depends on jgraph and SDL2
 # This library is protected by a GPLv3 license
 
+#####################################################
+
 STEM = clang++ -pedantic -Wall -Werror -g
 
-all: main.out npool.out outline.pdf
+#####################################################
 
-main.out:	oopnn.cpp resources.o networkSave.o /usr/include/jgraph
-	$(STEM) resources.o networkSave.o -o main.out oopnn.cpp `jgraph-flags`
+install: /usr/include/jgraph libjorbnet.a /usr/bin/jorbnet-flags docs
+	sudo cp -r . /usr/include/jorbnet
 
-npool.out:	poolmain.cpp npool.o resources.o networkSave.o
-	$(STEM) -o npool.out poolmain.cpp npool.o networkSave.o resources.o `jgraph-flags`
+#####################################################
+
+libjorbnet.a: build/npool.o build/resources.o build/networkSave.o
+	ar -rsv libjorbnet.a build/npool.o build/resources.o build/networkSave.o	
 
 /usr/include/jgraph:
 	git clone https://github.com/jorbDehmel/jgraph
@@ -18,17 +22,38 @@ npool.out:	poolmain.cpp npool.o resources.o networkSave.o
 	cd ../..
 	rm -rf jgraph
 
-npool.o:	npool.hpp npool.cpp
-	$(STEM) -c -o npool.o npool.cpp -pthread
+/usr/bin/jorbnet-flags:	jorbnet-flags.sh
+	chmod +x jorbnet-flags.sh
+	sudo cp jorbnet-flags.sh /usr/bin/jorbnet-flags
 
-resources.o:	resources.hpp resources.cpp
-	$(STEM) -c -o resources.o resources.cpp
+#####################################################
 
-networkSave.o:	networkSave.hpp networkSave.cpp
-	$(STEM) -c -o networkSave.o networkSave.cpp
+build/:
+	mkdir -p build
 
-outline.pdf: outline.tex
-	pdflatex outline.tex
+#####################################################
+
+build/npool.o:	build/ src/npool.hpp src/npool.cpp
+	$(STEM) -c -o build/npool.o src/npool.cpp -pthread
+
+build/resources.o:	build/ src/resources.hpp src/resources.cpp
+	$(STEM) -c -o build/resources.o src/resources.cpp
+
+build/networkSave.o:	build/ src/networkSave.hpp src/networkSave.cpp
+	$(STEM) -c -o build/networkSave.o src/networkSave.cpp
+
+#####################################################
 
 clean:
-	rm -rf *.out *.o *.pdf
+	rm -rf build/*.o *.a
+
+#####################################################
+
+docs:
+	pdflatex docs/outline.tex
+
+uninstall:
+	sudo rm -f /usr/bin/jorbnet-flags
+	sudo rm -rf /usr/include/jorbnet
+
+#####################################################

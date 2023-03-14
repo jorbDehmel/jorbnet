@@ -7,9 +7,7 @@ GPLv3 held by author
 */
 
 #include <iostream>
-#include "resources.hpp"
-#include "jgraph/jgraph.hpp"
-#include "networkSave.hpp"
+#include "../src/jorbNet.hpp"
 using namespace std;
 
 vector<double> dataToGraph;

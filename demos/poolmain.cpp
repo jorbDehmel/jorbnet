@@ -6,8 +6,7 @@ github.com/jorbDehmel
 GPLv3 held by author
 */
 
-#include "jgraph/jgraph.hpp"
-#include "npool.hpp"
+#include "../src/jorbNet.hpp"
 #include <chrono>
 #include <iostream>
 using namespace std;
