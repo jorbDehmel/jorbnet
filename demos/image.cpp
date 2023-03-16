@@ -11,15 +11,17 @@ using namespace std;
 
 int main(const int argc, const char *argv[])
 {
-    dataset img = loadBMP("test.bmp", 64, 64, {1, 2, 3}, BW_char);
+    dataset imgrgb = loadBMP("test.bmp", 64, 64, {1, 2, 3}, RGB);
+    saveBMP("rgb.bmp", 64, 64, imgrgb.inputs, RGB);
 
-    for (auto p : img.inputs)
-    {
-        cout << p << '\n';
-    }
-    cout << "Size: " << img.inputs.size() << '\n';
+    dataset imgrgba = loadBMP("test.bmp", 64, 64, {1, 2, 3}, RGBA);
+    saveBMP("rgba.bmp", 64, 64, imgrgba.inputs, RGBA);
 
-    saveBMP("bwscaled.bmp", 64, 64, img.inputs, BW_char);
+    dataset imgbwd = loadBMP("test.bmp", 64, 64, {1, 2, 3}, BW_double);
+    saveBMP("bw_double.bmp", 64, 64, imgbwd.inputs, BW_double);
+
+    dataset imgbwc = loadBMP("test.bmp", 64, 64, {1, 2, 3}, BW_char);
+    saveBMP("bw_char.bmp", 64, 64, imgbwc.inputs, BW_char);
 
     return 0;
 }

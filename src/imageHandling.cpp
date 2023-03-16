@@ -24,8 +24,6 @@ dataset loadBMP(const string &Filepath, const int &W, const int &H,
     unsigned char r, g, b, a;
     for (int i = 0; i < W * H; i++)
     {
-        cout << "Pixel " << i << '\n';
-
         SDL_GetRGBA(pixels[i], scaled->format, &r, &g, &b, &a);
 
         switch (M)
@@ -76,7 +74,7 @@ void saveBMP(const string &Filepath, const int &W, const int &H,
         assert(What.size() >= W * H * 4);
         for (i = 0; i < W * H * 4; i += 4)
         {
-            SDL_SetRenderDrawColor(rend, What[i], What[i] + 1, What[i] + 2, What[i] + 3);
+            SDL_SetRenderDrawColor(rend, What[i], What[i + 1], What[i + 2], What[i + 3]);
             SDL_RenderDrawPoint(rend, (i / 4) % W, (i / 4) / W);
         }
         break;
@@ -84,7 +82,7 @@ void saveBMP(const string &Filepath, const int &W, const int &H,
         assert(What.size() >= W * H * 3);
         for (i = 0; i < W * H * 3; i += 3)
         {
-            SDL_SetRenderDrawColor(rend, What[i], What[i] + 1, What[i] + 2, 255);
+            SDL_SetRenderDrawColor(rend, What[i], What[i + 1], What[i + 2], 255);
             SDL_RenderDrawPoint(rend, (i / 3) % W, (i / 3) / W);
         }
         break;
