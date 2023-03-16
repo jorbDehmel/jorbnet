@@ -8,14 +8,15 @@ STEM = clang++ -pedantic -Wall -Werror -g
 #####################################################
 
 install: /usr/include/jgraph libjorbnet.a /usr/bin/jorbnet-flags docs
-	sudo mkdir -p /usr/include/jorbnet/src
-	sudo cp -rf src/*.hpp /usr/include/jorbnet/src
+	sudo rm -rf /usr/include/jorbnet
+	sudo mkdir -p /usr/include/jorbnet
+	sudo cp -rf src/*.hpp /usr/include/jorbnet
 	sudo cp -f libjorbnet.a /usr/include/jorbnet
 	
 #####################################################
 
-libjorbnet.a: build/npool.o build/resources.o build/networkSave.o
-	ar -rsv libjorbnet.a build/npool.o build/resources.o build/networkSave.o	
+libjorbnet.a: build/npool.o build/resources.o build/networkSave.o build/images.o
+	ar -rsv libjorbnet.a build/npool.o build/resources.o build/networkSave.o build/images.o
 
 /usr/include/jgraph:
 	git clone https://github.com/jorbDehmel/jgraph
@@ -44,6 +45,9 @@ build/resources.o:	build/ src/resources.hpp src/resources.cpp
 build/networkSave.o:	build/ src/networkSave.hpp src/networkSave.cpp
 	$(STEM) -c -o build/networkSave.o src/networkSave.cpp
 
+build/images.o:	build/ src/imageHandling.hpp src/imageHandling.cpp
+	$(STEM) -c -o build/images.o src/imageHandling.cpp
+
 #####################################################
 
 clean:
@@ -51,8 +55,12 @@ clean:
 
 #####################################################
 
-docs:
+docs: docs/outline.pdf
+
+docs/outline.pdf:
 	pdflatex docs/outline.tex
+	mv *.pdf docs
+	rm -rf *.aux *.log
 
 uninstall:
 	sudo rm -f /usr/bin/jorbnet-flags

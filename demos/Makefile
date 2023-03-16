@@ -8,7 +8,7 @@ SUFFIX = `jorbnet-flags`
 
 #####################################################
 
-all: main.out npool.out
+all: main.out npool.out image.out
 
 #####################################################
 
@@ -17,6 +17,9 @@ main.out:	oopnn.cpp
 
 npool.out:	poolmain.cpp
 	$(STEM) -o npool.out poolmain.cpp `jorbnet-flags`
+
+image.out:	image.cpp
+	$(STEM) -o image.out image.cpp `jorbnet-flags`
 
 #####################################################
 
