@@ -105,3 +105,18 @@ void saveBMP(const string &Filepath, const int &W, const int &H,
 
     return;
 }
+
+vector<dataset> addNoise(const dataset &To, const double &Amount, const int &NumOutputs)
+{
+    vector<dataset> out;
+    for (int i = 0; i < NumOutputs; i++)
+    {
+        dataset toAdd = To;
+        for (int j = 0; j < toAdd.inputs.size(); j++)
+        {
+            toAdd.inputs[j] += drand(-Amount, Amount);
+        }
+        out.push_back(toAdd);
+    }
+    return out;
+}

@@ -56,10 +56,15 @@ void __threadTrain(network *ToCall, const int &TrainFor)
     return;
 }
 
-void npool::train(const int &NumTimes)
+void npool::train(const int &NumTimes, const bool &PrintUpdates)
 {
     for (int i = 0; i < NumTimes; i += cullInterval)
     {
+        if (PrintUpdates)
+        {
+            cout << "Network pool is on pass #" << i << '\n';
+        }
+
         // Start training
         thread **threads = new thread *[num];
         assert(threads != nullptr);

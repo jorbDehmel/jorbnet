@@ -8,11 +8,66 @@ GPLv3 held by author
 
 #include "resources.hpp"
 
+string toTime(long long Ns)
+{
+    if (Ns < 0)
+    {
+        return "NaN";
+    }
+
+    long long nanoseconds, microseconds, milliseconds, seconds, minutes, hours, days;
+
+    nanoseconds = Ns;
+    microseconds = nanoseconds / 1'000;
+    milliseconds = microseconds / 1'000;
+    seconds = milliseconds / 1'000;
+    minutes = seconds / 60;
+    hours = minutes / 60;
+    days = hours / 24;
+
+    nanoseconds %= 1'000;
+    microseconds %= 1'000;
+    milliseconds %= 1'000;
+    seconds %= 60;
+    minutes %= 60;
+    hours %= 24;
+
+    string out = "";
+    if (days != 0)
+    {
+        out = to_string(days) + ((days != 1) ? " days, " : " day, ");
+    }
+    if (hours != 0)
+    {
+        out += to_string(hours) + ((hours != 1) ? " hours, " : " hour, ");
+    }
+    if (minutes != 0)
+    {
+        out += to_string(minutes) + ((minutes != 1) ? " minutes, " : " minute, ");
+    }
+    if (seconds != 0)
+    {
+        out += to_string(seconds) + ((seconds != 1) ? " seconds, " : " second, ");
+    }
+    if (milliseconds != 0)
+    {
+        out += to_string(milliseconds) + ((milliseconds != 1) ? " milliseconds, " : " millisecond, ");
+    }
+    if (microseconds != 0)
+    {
+        out += to_string(microseconds) + ((microseconds != 1) ? " microseconds, " : " microsecond, ");
+    }
+    if (nanoseconds != 0)
+    {
+        out += to_string(nanoseconds) + ((nanoseconds != 1) ? " nanoseconds  " : " nanosecond  ");
+    }
+
+    return out.substr(0, out.size() - 2) + '.';
+}
+
 double drand(const double &Min, const double &Max)
 {
-    double out;
-    out = Min + (Max - Min) * (double)rand() / RAND_MAX;
-    return out;
+    return Min + (Max - Min) * (double)rand() / RAND_MAX;
 }
 
 void initNode(node &Out, node *Links, const int &NumLinks)
@@ -61,18 +116,34 @@ void freeNode(node *What)
 
 double wsum(const node &What)
 {
-    double out = 0;
+    double out = What.bias;
     for (int i = 0; i < What.links.size(); i++)
     {
         out += What.links[i]->act * What.weights[i];
     }
-    out += What.bias;
     return out;
 }
 
+#define CSIG_DIV 5.62
+#define CSIG_MIN -2.81
+#define CSIG_MAX 2.81
 double sig(const double &X)
 {
-    return 1 / (1 + pow(M_E, -X));
+    if (X < CSIG_MIN)
+    {
+        return 0;
+    }
+    else if (X > CSIG_MAX)
+    {
+        return 1;
+    }
+    else
+    {
+        return 0.5 + X / CSIG_DIV;
+    }
+
+    // For reference, the real sig function:
+    // return 1 / (1 + pow(M_E, -X));
 }
 
 double prop(node &What)
@@ -113,14 +184,10 @@ double mag(vector<double> &What)
 }
 
 // Get the derivative of a single node with respect to some weight 'For'
+// long int bpropCount = 0;
 double bprop(node &What, double *For, map<node *, double> &FoundWeights, map<node *, double> &FoundGenerals)
 {
-    // Safeguard against recalculating
-    if (FoundWeights.count(&What) != 0)
-    {
-        // Word salad if I've ever heard it
-        throw runtime_error("Auxilery derivative map safeguard failed");
-    }
+    // bpropCount++;
 
     // Safeguard against reaching the input without dependancy on the weight
     if (What.links.size() == 0)
@@ -137,21 +204,22 @@ double bprop(node &What, double *For, map<node *, double> &FoundWeights, map<nod
     }
     double myDer = FoundGenerals[&What];
 
+    if (&What.bias == For)
+    {
+        FoundWeights[&What] = myDer;
+        return FoundWeights[&What];
+    }
+
     // If the weight is connected to this node, the derivative is equal
     // to the previous activation of the node linked to it
     for (int i = 0; i < What.links.size(); i++)
     {
         if (&What.weights[i] == For)
         {
+            // Uses traditional sigmoid derivative (even though it really uses quicksig)
             FoundWeights[&What] = myDer * What.links[i]->act;
             return FoundWeights[&What];
         }
-    }
-
-    if (&What.bias == For)
-    {
-        FoundWeights[&What] = myDer;
-        return FoundWeights[&What];
     }
 
     // Otherwise, the weight is not directly connected to this node.
@@ -171,14 +239,17 @@ double bprop(node &What, double *For, map<node *, double> &FoundWeights, map<nod
         // Otherwise, compute it for the first time
         else
         {
+            // EXPENSIVE CALL
             auto temp = What.weights[i] * bprop(*What.links[i], For, FoundWeights, FoundGenerals);
             out += temp;
+
+            assert(FoundWeights.count(What.links[i]) != 0);
         }
     }
+
+    // Polish up derivative and add to list of found
     out *= myDer;
     FoundWeights[&What] = out;
-
-    // cout << "Node " << &What << " has derivative " << out << " wrt " << &For << '\n';
 
     return out;
 }
@@ -334,41 +405,52 @@ void network::backprop(const int Index)
         data = &trainingData[Index];
     }
 
-    // Find observed
+    // Find observed and error
     vector<double> observed = propogate(data->inputs);
 
-    // Construct gradient error vector w/ respect to each weight
-    vector<double> gradient;
-    map<node *, double> foundGenerals;
-    for (double *weight : weights)
+    vector<double> errorVec;
+    for (int i = 0; i < observed.size(); i++)
     {
+        errorVec.push_back(data->expected[i] - observed[i]);
+    }
+
+    // Construct gradient error vector w/ respect to each weight
+    /*auto start = chrono::high_resolution_clock::now();
+    bpropCount = 0;*/
+
+    double *gradient = new double[weights.size()];
+
+    map<node *, double> foundGenerals;
+    for (int weightIndex = 0; weightIndex < weights.size(); weightIndex++)
+    {
+        double *weight = weights[weightIndex];
+
         // Get the derivative of the error function
         // with respect to the current weight
 
-        // Sum
-        double der = 0;
+        gradient[weightIndex] = 0;
         map<node *, double> foundWeights;
         for (int i = 0; i < observed.size(); i++)
         {
             // Sum of err times derivative of each output node
-            der -= 2 * (data->expected[i] - observed[i]) * bprop(nodes[sizes.size() - 1][i], weight, foundWeights, foundGenerals);
+            gradient[weightIndex] -= errorVec[i] * bprop(nodes[sizes.size() - 1][i], weight, foundWeights, foundGenerals);
         }
-
-        // cout << "Entry " << gradient.size() << '\t' << der << '\n';
-
-        gradient.push_back(der);
+        gradient[weightIndex] *= 2;
     }
 
-    // Set up for normalization
-    double magnitude = mag(gradient);
+    delete[] gradient;
+
+    /*auto end = chrono::high_resolution_clock::now();
+    cout << "Gradient finding took "
+         << chrono::duration_cast<chrono::nanoseconds>(end - start).count()
+         << " ns.\n"
+         << "There were " << weights.size() << " weights.\n"
+         << "BProp was called " << bpropCount << " times.\n";*/
 
     // Move away from direction of gradient vector (decr weights)
-    for (int i = 0; i < gradient.size(); i++)
+    for (int i = 0; i < weights.size(); i++)
     {
-        if (magnitude != 0)
-        {
-            *weights[i] -= (gradient[i] / magnitude) * drand(MIN_STEP_SIZE, MAX_STEP_SIZE);
-        }
+        *weights[i] -= gradient[i] * drand(MIN_STEP_SIZE, MAX_STEP_SIZE);
     }
 
     passes++;
@@ -381,6 +463,7 @@ void network::train(const int NumTimes)
     {
         backprop(-1);
 
+        // Note: Passes is incremented by backprop
         if (passes % LOG_INTERVAL == 0)
         {
             double error = 0;

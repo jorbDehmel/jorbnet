@@ -25,6 +25,11 @@ using namespace std;
 
 #define ERROR_BREAK 0.01
 
+#define chrono_now() chrono::high_resolution_clock::now()
+#define chrono_ns(A) chrono::duration_cast<chrono::nanoseconds>(A).count()
+
+string toTime(long long Ns);
+
 struct node
 {
     double act;

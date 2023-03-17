@@ -31,21 +31,16 @@ libjorbnet.a: build/npool.o build/resources.o build/networkSave.o build/images.o
 
 #####################################################
 
-build/:
-	mkdir -p build
-
-#####################################################
-
-build/npool.o:	build/ src/npool.hpp src/npool.cpp
+build/npool.o:	src/npool.hpp src/npool.cpp
 	$(STEM) -c -o build/npool.o src/npool.cpp -pthread
 
-build/resources.o:	build/ src/resources.hpp src/resources.cpp
+build/resources.o:	src/resources.hpp src/resources.cpp
 	$(STEM) -c -o build/resources.o src/resources.cpp
 
-build/networkSave.o:	build/ src/networkSave.hpp src/networkSave.cpp
+build/networkSave.o:	src/networkSave.hpp src/networkSave.cpp
 	$(STEM) -c -o build/networkSave.o src/networkSave.cpp
 
-build/images.o:	build/ src/imageHandling.hpp src/imageHandling.cpp
+build/images.o:	src/imageHandling.hpp src/imageHandling.cpp
 	$(STEM) -c -o build/images.o src/imageHandling.cpp
 
 #####################################################

@@ -13,6 +13,9 @@ void saveNetwork(const string &Filename, network &From)
     ofstream file(Filename);
     assert(file.is_open());
 
+    // Save passes
+    file << From.passes << "\n\n";
+
     // Save sizes
     file << From.sizes.size() << '\n';
     for (auto s : From.sizes)
@@ -73,6 +76,10 @@ network loadNetwork(const string &Filename)
 {
     ifstream file(Filename);
     assert(file.is_open());
+
+    // Load passes
+    int passes;
+    file >> passes;
 
     vector<int> sizes;
 
@@ -138,6 +145,7 @@ network loadNetwork(const string &Filename)
         file >> error;
         out.errors.push_back(error);
     }
+    out.passes = passes;
 
     file.close();
     return out;

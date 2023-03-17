@@ -24,7 +24,7 @@ public:
     double minVar = 1;
     network **networks;
 
-    void train(const int &Num);
+    void train(const int &Num, const bool &PrintUpdates = false);
     network best();
 };
 

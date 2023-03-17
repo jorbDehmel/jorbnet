@@ -27,4 +27,6 @@ dataset loadBMP(const string &Filepath, const int &W, const int &H,
 void saveBMP(const string &Filepath, const int &W, const int &H,
              const vector<double> &What, const Mode M);
 
+vector<dataset> addNoise(const dataset &To, const double &Amount, const int &NumOutputs);
+
 #endif
