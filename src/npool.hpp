@@ -11,6 +11,7 @@ GPLv3 held by author
 
 #include "resources.hpp"
 #include "networkSave.hpp"
+#include "network.hpp"
 #include <thread>
 using namespace std;
 

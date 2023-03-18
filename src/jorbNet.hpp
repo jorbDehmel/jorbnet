@@ -17,6 +17,7 @@ GPLv3 held by author
 #include "resources.hpp"
 #include "networkSave.hpp"
 #include "npool.hpp"
-#include "imageHandling.hpp"
+#include "image.hpp"
+#include "network.hpp"
 
 #endif

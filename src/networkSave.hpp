@@ -12,9 +12,13 @@ GPLv3 held by author
 #include <string>
 #include <fstream>
 #include "resources.hpp"
+#include "network.hpp"
 using namespace std;
 
+void saveNetwork(ostream &Stream, network &From);
 void saveNetwork(const string &Filename, network &From);
+
+network loadNetwork(istream &Stream);
 network loadNetwork(const string &Filename);
 
 #endif

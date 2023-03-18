@@ -4,6 +4,7 @@
 #####################################################
 
 STEM = clang++ -pedantic -Wall -Werror -g
+OBJECTS = build/npool.o build/resources.o build/networkSave.o build/image.o build/network.o build/sockstream.o
 
 #####################################################
 
@@ -17,8 +18,8 @@ install: /usr/include/jorbnet
 	
 #####################################################
 
-libjorbnet.a: build/npool.o build/resources.o build/networkSave.o build/images.o
-	ar -rsv libjorbnet.a build/npool.o build/resources.o build/networkSave.o build/images.o
+libjorbnet.a:	$(OBJECTS)
+	ar -rsv libjorbnet.a $(OBJECTS)
 
 /usr/include/jgraph:
 	git clone https://github.com/jorbDehmel/jgraph
@@ -42,8 +43,14 @@ build/resources.o:	src/resources.hpp src/resources.cpp
 build/networkSave.o:	src/networkSave.hpp src/networkSave.cpp
 	$(STEM) -c -o build/networkSave.o src/networkSave.cpp
 
-build/images.o:	src/imageHandling.hpp src/imageHandling.cpp
-	$(STEM) -c -o build/images.o src/imageHandling.cpp
+build/image.o:	src/image.hpp src/image.cpp
+	$(STEM) -c -o build/image.o src/image.cpp
+
+build/network.o:	src/network.hpp src/network.cpp
+	$(STEM) -c -o build/network.o src/network.cpp
+
+build/sockstream.o: src/misc/sockstream.hpp src/misc/sockstream.hpp
+	$(STEM) -c -o build/sockstream.o src/misc/sockstream.cpp -pthread
 
 #####################################################
 

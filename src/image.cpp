@@ -6,7 +6,7 @@ github.com/jorbDehmel
 GPLv3 held by author
 */
 
-#include "imageHandling.hpp"
+#include "image.hpp"
 
 dataset loadBMP(const string &Filepath, const int &W, const int &H,
                 const vector<double> &Expected, const Mode M)

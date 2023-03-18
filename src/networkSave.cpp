@@ -8,21 +8,18 @@ GPLv3 held by author
 
 #include "networkSave.hpp"
 
-void saveNetwork(const string &Filename, network &From)
+void saveNetwork(ostream &Stream, network &From)
 {
-    ofstream file(Filename);
-    assert(file.is_open());
-
     // Save passes
-    file << From.passes << "\n\n";
+    Stream << From.passes << "\n\n";
 
     // Save sizes
-    file << From.sizes.size() << '\n';
+    Stream << From.sizes.size() << '\n';
     for (auto s : From.sizes)
     {
-        file << s << '\t';
+        Stream << s << '\t';
     }
-    file << "\n\n";
+    Stream << "\n\n";
 
     // Save nodes
     for (int layer = 1; layer < From.sizes.size(); layer++)
@@ -30,66 +27,73 @@ void saveNetwork(const string &Filename, network &From)
         for (int node = 0; node < From.sizes[layer]; node++)
         {
             // Activation and bias
-            file << From.nodes[layer][node].act << '\t' << From.nodes[layer][node].bias << '\n';
+            Stream << From.nodes[layer][node].act << '\t' << From.nodes[layer][node].bias << '\n';
 
             // Weights
             for (int weight = 0; weight < From.sizes[layer - 1]; weight++)
             {
-                file << From.nodes[layer][node].weights[weight] << '\t';
+                Stream << From.nodes[layer][node].weights[weight] << '\t';
             }
-            file << '\n';
+            Stream << '\n';
         }
     }
-    file << '\n';
+    Stream << '\n';
 
     // Save training data
-    file << From.trainingData.size() << '\n';
+    Stream << From.trainingData.size() << '\n';
     for (int i = 0; i < From.trainingData.size(); i++)
     {
-        file << From.trainingData[i].inputs.size() << '\n';
+        Stream << From.trainingData[i].inputs.size() << '\n';
         for (auto inp : From.trainingData[i].inputs)
         {
-            file << inp << '\t';
+            Stream << inp << '\t';
         }
-        file << '\n';
+        Stream << '\n';
 
-        file << From.trainingData[i].expected.size() << '\n';
+        Stream << From.trainingData[i].expected.size() << '\n';
         for (auto exp : From.trainingData[i].expected)
         {
-            file << exp << '\t';
+            Stream << exp << '\t';
         }
-        file << '\n';
+        Stream << '\n';
     }
-    file << '\n';
+    Stream << '\n';
 
     // Save error history
     for (auto e : From.errors)
     {
-        file << e << '\t';
+        Stream << e << '\t';
     }
+
+    return;
+}
+
+void saveNetwork(const string &Filename, network &From)
+{
+    ofstream file(Filename);
+    assert(file.is_open());
+
+    saveNetwork(file, From);
 
     file.close();
     return;
 }
 
-network loadNetwork(const string &Filename)
+network loadNetwork(istream &Stream)
 {
-    ifstream file(Filename);
-    assert(file.is_open());
-
     // Load passes
     int passes;
-    file >> passes;
+    Stream >> passes;
 
     vector<int> sizes;
 
     // Load sizes
     int size;
-    file >> size;
+    Stream >> size;
     for (int i = 0; i < size; i++)
     {
         int layerSize;
-        file >> layerSize;
+        Stream >> layerSize;
         sizes.push_back(layerSize);
     }
 
@@ -102,36 +106,36 @@ network loadNetwork(const string &Filename)
         for (int node = 0; node < out.sizes[layer]; node++)
         {
             // Activation and bias
-            file >> out.nodes[layer][node].act >> out.nodes[layer][node].bias;
+            Stream >> out.nodes[layer][node].act >> out.nodes[layer][node].bias;
 
             // Weights
             for (int weight = 0; weight < out.sizes[layer - 1]; weight++)
             {
-                file >> out.nodes[layer][node].weights[weight];
+                Stream >> out.nodes[layer][node].weights[weight];
             }
         }
     }
 
     // Load training data
-    file >> size;
+    Stream >> size;
     for (int i = 0; i < size; i++)
     {
         dataset toAdd;
 
         int dataSize;
-        file >> dataSize;
+        Stream >> dataSize;
         for (int j = 0; j < dataSize; j++)
         {
             double temp;
-            file >> temp;
+            Stream >> temp;
             toAdd.inputs.push_back(temp);
         }
 
-        file >> dataSize;
+        Stream >> dataSize;
         for (int j = 0; j < dataSize; j++)
         {
             double temp;
-            file >> temp;
+            Stream >> temp;
             toAdd.expected.push_back(temp);
         }
 
@@ -139,13 +143,23 @@ network loadNetwork(const string &Filename)
     }
 
     // Load error history
-    while (!file.eof())
+    while (!Stream.eof())
     {
         double error;
-        file >> error;
+        Stream >> error;
         out.errors.push_back(error);
     }
     out.passes = passes;
+
+    return out;
+}
+
+network loadNetwork(const string &Filename)
+{
+    ifstream file(Filename);
+    assert(file.is_open());
+
+    network out = loadNetwork(file);
 
     file.close();
     return out;
