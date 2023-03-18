@@ -29,12 +29,12 @@ int main()
         n.trainingData.push_back(a);
     }
 
-    npool p(n, 10, 7, 2);
+    npool p(n, 10, 7, 5);
 
     n.train(1);
 
     auto start = chrono_now();
-    p.train(10, true);
+    p.train(20, true);
     auto end = chrono_now();
     cout << "Trained. Time: " << toTime(chrono_ns(end - start)) << '\n';
 

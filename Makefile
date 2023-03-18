@@ -7,7 +7,9 @@ STEM = clang++ -pedantic -Wall -Werror -g
 
 #####################################################
 
-install: /usr/include/jgraph libjorbnet.a /usr/bin/jorbnet-flags docs
+install: /usr/include/jorbnet
+
+/usr/include/jorbnet:	/usr/include/jgraph libjorbnet.a /usr/bin/jorbnet-flags docs
 	sudo rm -rf /usr/include/jorbnet
 	sudo mkdir -p /usr/include/jorbnet
 	sudo cp -rf src/*.hpp /usr/include/jorbnet
