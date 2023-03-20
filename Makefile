@@ -23,7 +23,7 @@ libjorbnet.a:	$(OBJECTS)
 
 /usr/include/jgraph:
 	git clone https://github.com/jorbDehmel/jgraph
-	cd jgraph/jgraph
+	$(MAKE) -C jgraph/jgraph
 	make install
 	cd ../..
 	rm -rf jgraph
@@ -35,6 +35,7 @@ libjorbnet.a:	$(OBJECTS)
 #####################################################
 
 build/npool.o:	src/npool.hpp src/npool.cpp
+	mkdir -p build
 	$(STEM) -c -o build/npool.o src/npool.cpp -pthread
 
 build/resources.o:	src/resources.hpp src/resources.cpp
