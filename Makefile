@@ -62,7 +62,7 @@ clean:
 
 docs: docs/outline.pdf
 
-docs/outline.pdf:
+docs/outline.pdf: docs/outline.tex
 	pdflatex docs/outline.tex
 	mv *.pdf docs
 	rm -rf *.aux *.log
