@@ -24,93 +24,79 @@ double __sigder(const double &Act)
     return Act * (1 - Act);
 }
 
+double __ReLU(const double &X)
+{
+    if (X > 0)
+    {
+        return X;
+    }
+    else
+    {
+        return 0;
+    }
+}
+
+double __ReLUder(const double &Act)
+{
+    if (Act > 0)
+    {
+        return 1;
+    }
+    else
+    {
+        return 0;
+    }
+}
+
 NetworkLA::NetworkLA(const vector<int> &Sizes)
 {
-    assert(!Sizes.empty());
-
+    // Construct sizes list
     numLayers = Sizes.size();
-
     sizes = SafeArray<int>(numLayers);
     for (int i = 0; i < numLayers; i++)
     {
         sizes[i] = Sizes[i];
     }
 
+    // Construct the first dimensions of activations and weights
     activations = SafeArray<SafeArray<double>>(numLayers);
     weights = SafeArray<SafeArray<SafeArray<double>>>(numLayers - 1);
 
+    // Construct the second dimensions of activations and weights
     for (int layer = 0; layer < numLayers; layer++)
     {
         activations[layer] = SafeArray<double>(sizes[layer]);
 
         if (layer + 1 != numLayers)
         {
-            weights[layer] = SafeArray<SafeArray<double>>(sizes[layer]);
+            weights[layer] = SafeArray<SafeArray<double>>(sizes[layer + 1]);
         }
     }
 
-    cout << "Populating and constructing weights...\n";
-
+    // Construct the third dimension of weights
     for (int layer = 0; layer + 1 < numLayers; layer++)
     {
         for (int node = 0; node < sizes[layer + 1]; node++)
         {
-            cout << "Creating " << layer << " " << node << "...\n";
-
             weights[layer][node] = SafeArray<double>(sizes[layer] + 1);
 
             for (int weight = 0; weight < sizes[layer] + 1; weight++)
             {
-                cout << "Populating " << layer << " " << node << " " << weight << '\n';
-
                 weights[layer][node][weight] = drand(-WV, WV);
             }
         }
     }
-
-    cout << "Finished construction.\n";
-
-    return;
-}
-
-NetworkLA::~NetworkLA()
-{
-    /*
-    cout << "Beginning deallocation.\n";
-
-    for (int layer = 0; layer + 1 < numLayers; layer++)
-    {
-        for (int node = 0; node < sizes[layer + 1]; node++)
-        {
-            delete[] weights[layer][node];
-        }
-        delete[] weights[layer];
-    }
-    delete[] weights;
-
-    cout << "Deallocating activations...\n";
-    for (int layer = 0; layer < numLayers; layer++)
-    {
-        cout << "Deallocating for layer " << layer << " w/ address " << activations[layer] << '\n';
-        delete[] activations[layer];
-        cout << "Dealloc'd.\n";
-    }
-    cout << "Finished deallocating activations.\n";
-    delete[] activations;
-    delete[] sizes;
-    */
 
     return;
 }
 
 vector<double> NetworkLA::prop(const vector<double> &Input)
 {
+    // Ensure input vector matches network size
     if (Input.size() != sizes[0])
     {
         throw runtime_error("Error: Input size does not match network size");
     }
-
-    cout << "Loading inputs...\n";
 
     // Load into inputs
     for (int i = 0; i < Input.size(); i++)
@@ -118,15 +104,11 @@ vector<double> NetworkLA::prop(const vector<double> &Input)
         activations[0][i] = Input[i];
     }
 
-    cout << "Propogating...\n";
-
     // Propogate
     for (int layer = 1; layer < numLayers; layer++)
     {
         for (int node = 0; node < sizes[layer]; node++)
         {
-            cout << "on node at " << layer << " " << node << '\n';
-            cout << "size of below: " << sizes[layer - 1] << '\n';
             activations[layer][node] = bdot(activations[layer - 1], weights[layer - 1][node], sizes[layer - 1]);
             activations[layer][node] = act(activations[layer][node]);
         }
@@ -144,17 +126,8 @@ vector<double> NetworkLA::prop(const vector<double> &Input)
 
 double NetworkLA::backprop(const vector<double> &Expected)
 {
-    return 0;
-}
-
-double NetworkLA::dot(const double *A, const double *B, const int &Size) const
-{
-    double out = 0;
-    for (int i = 0; i < Size; i++)
-    {
-        out += A[i] * B[i];
-    }
-    return out;
+    throw runtime_error("Bcakprop is unimplemented.");
+    return -1;
 }
 
 double NetworkLA::bdot(SafeArray<double> Inputs, SafeArray<double> Weights, const int &SizeOfInputs) const
@@ -162,21 +135,35 @@ double NetworkLA::bdot(SafeArray<double> Inputs, SafeArray<double> Weights, cons
     double out = Weights[SizeOfInputs];
     for (int i = 0; i < SizeOfInputs; i++)
     {
-        out += Inputs[i] * Weights[i];
+        if (Weights[i] && Inputs[i])
+        {
+            out += Inputs[i] * Weights[i];
+        }
     }
 
     return out;
 }
 
+#include <chrono>
 int main()
 {
     srand(time(NULL));
 
-    vector<int> sizes = {3, 5, 2};
+    vector<int> sizes = {3, 5, 10, 2, 5};
     NetworkLA n(sizes);
+    n.act = __ReLU;
+    n.actder = __ReLUder;
 
     vector<double> inp = {1, 2, 3};
+
+    auto start = chrono::high_resolution_clock::now();
+
     auto out = n.prop(inp);
+
+    auto end = chrono::high_resolution_clock::now();
+    int elapsed = chrono::duration_cast<chrono::nanoseconds>(end - start).count();
+
+    cout << "Propogation took " << elapsed << " ns.\n";
 
     for (auto i : out)
     {

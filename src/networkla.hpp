@@ -22,20 +22,22 @@ using namespace std;
 
 double drand(const double &Min, const double &Max);
 
+// Default activation function and derivative (given activation)
 double __sigmoid(const double &X);
-double __sigder(const double &X);
+double __sigder(const double &Act);
+
+// Rectifier activation function and derivative (given activation)
+double __ReLU(const double &X);
+double __ReLUder(const double &Act);
 
 // Network using linear algebra
 class NetworkLA
 {
 public:
     NetworkLA(const vector<int> &Sizes);
-    ~NetworkLA();
 
     vector<double> prop(const vector<double> &Input);
     double backprop(const vector<double> &Expected);
-
-    double dot(const double *A, const double *B, const int &Size) const;
 
     // Assumes weights is one item longer, with the final entry being bias
     double bdot(SafeArray<double> Inputs, SafeArray<double> Weights, const int &SizeOfInputs) const;
@@ -49,10 +51,6 @@ protected:
     SafeArray<int> sizes;
     SafeArray<SafeArray<double>> activations;
     SafeArray<SafeArray<SafeArray<double>>> weights;
-
-    // int *sizes = nullptr;
-    // double **activations = nullptr;
-    // double ***weights = nullptr;
 };
 
 #endif
