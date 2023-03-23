@@ -30,51 +30,54 @@ NetworkLA::NetworkLA(const vector<int> &Sizes)
 
     numLayers = Sizes.size();
 
-    sizes = new int[numLayers];
+    sizes = SafeArray<int>(numLayers);
     for (int i = 0; i < numLayers; i++)
     {
         sizes[i] = Sizes[i];
     }
 
-    activations = new double *[numLayers];
-    weights = new double **[numLayers - 1];
-
-    assert(sizes != nullptr);
-    assert(activations != nullptr);
-    assert(weights != nullptr);
+    activations = SafeArray<SafeArray<double>>(numLayers);
+    weights = SafeArray<SafeArray<SafeArray<double>>>(numLayers - 1);
 
     for (int layer = 0; layer < numLayers; layer++)
     {
-        activations[layer] = new double[sizes[layer]];
-        assert(activations[layer] != nullptr);
+        activations[layer] = SafeArray<double>(sizes[layer]);
 
         if (layer + 1 != numLayers)
         {
-            weights[layer] = new double *[sizes[layer]];
-            assert(weights[layer] != nullptr);
+            weights[layer] = SafeArray<SafeArray<double>>(sizes[layer]);
         }
     }
+
+    cout << "Populating and constructing weights...\n";
 
     for (int layer = 0; layer + 1 < numLayers; layer++)
     {
         for (int node = 0; node < sizes[layer + 1]; node++)
         {
-            weights[layer][node] = new double[sizes[layer] + 1];
-            assert(weights[layer][node] != nullptr);
+            cout << "Creating " << layer << " " << node << "...\n";
 
-            // Initialize weights and bias to random values
+            weights[layer][node] = SafeArray<double>(sizes[layer] + 1);
+
             for (int weight = 0; weight < sizes[layer] + 1; weight++)
             {
+                cout << "Populating " << layer << " " << node << " " << weight << '\n';
+
                 weights[layer][node][weight] = drand(-WV, WV);
             }
         }
     }
+
+    cout << "Finished construction.\n";
 
     return;
 }
 
 NetworkLA::~NetworkLA()
 {
+    /*
+    cout << "Beginning deallocation.\n";
+
     for (int layer = 0; layer + 1 < numLayers; layer++)
     {
         for (int node = 0; node < sizes[layer + 1]; node++)
@@ -84,13 +87,18 @@ NetworkLA::~NetworkLA()
         delete[] weights[layer];
     }
     delete[] weights;
-    delete[] sizes;
 
+    cout << "Deallocating activations...\n";
     for (int layer = 0; layer < numLayers; layer++)
     {
+        cout << "Deallocating for layer " << layer << " w/ address " << activations[layer] << '\n';
         delete[] activations[layer];
+        cout << "Dealloc'd.\n";
     }
+    cout << "Finished deallocating activations.\n";
     delete[] activations;
+    delete[] sizes;
+    */
 
     return;
 }
@@ -102,17 +110,23 @@ vector<double> NetworkLA::prop(const vector<double> &Input)
         throw runtime_error("Error: Input size does not match network size");
     }
 
+    cout << "Loading inputs...\n";
+
     // Load into inputs
     for (int i = 0; i < Input.size(); i++)
     {
         activations[0][i] = Input[i];
     }
 
+    cout << "Propogating...\n";
+
     // Propogate
     for (int layer = 1; layer < numLayers; layer++)
     {
         for (int node = 0; node < sizes[layer]; node++)
         {
+            cout << "on node at " << layer << " " << node << '\n';
+            cout << "size of below: " << sizes[layer - 1] << '\n';
             activations[layer][node] = bdot(activations[layer - 1], weights[layer - 1][node], sizes[layer - 1]);
             activations[layer][node] = act(activations[layer][node]);
         }
@@ -143,7 +157,7 @@ double NetworkLA::dot(const double *A, const double *B, const int &Size) const
     return out;
 }
 
-double NetworkLA::bdot(const double *Inputs, const double *Weights, const int &SizeOfInputs) const
+double NetworkLA::bdot(SafeArray<double> Inputs, SafeArray<double> Weights, const int &SizeOfInputs) const
 {
     double out = Weights[SizeOfInputs];
     for (int i = 0; i < SizeOfInputs; i++)
@@ -158,7 +172,7 @@ int main()
 {
     srand(time(NULL));
 
-    vector<int> sizes = {3, 4, 1};
+    vector<int> sizes = {3, 5, 2};
     NetworkLA n(sizes);
 
     vector<double> inp = {1, 2, 3};

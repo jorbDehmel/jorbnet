@@ -13,6 +13,9 @@ GPLv3 held by author
 #include <cmath>
 #include <iostream>
 #include <cassert>
+
+#include "misc/safeArray.hpp"
+
 using namespace std;
 
 #define WV 5
@@ -35,16 +38,21 @@ public:
     double dot(const double *A, const double *B, const int &Size) const;
 
     // Assumes weights is one item longer, with the final entry being bias
-    double bdot(const double *Inputs, const double *Weights, const int &SizeOfInputs) const;
+    double bdot(SafeArray<double> Inputs, SafeArray<double> Weights, const int &SizeOfInputs) const;
 
     double (*act)(const double &X) = __sigmoid;
     double (*actder)(const double &X) = __sigder;
 
 protected:
     int numLayers = 0;
-    int *sizes = nullptr;
-    double **activations = nullptr;
-    double ***weights = nullptr;
+
+    SafeArray<int> sizes;
+    SafeArray<SafeArray<double>> activations;
+    SafeArray<SafeArray<SafeArray<double>>> weights;
+
+    // int *sizes = nullptr;
+    // double **activations = nullptr;
+    // double ***weights = nullptr;
 };
 
 #endif
