@@ -13,6 +13,8 @@ GPLv3 held by author
 #include <string>
 using namespace std;
 
+#define FATAL true
+
 class safearray_error : public runtime_error
 {
 public:
@@ -44,7 +46,15 @@ public:
         catch (...)
         {
             cout << "SafeArray error: Failed to allocate array of size " << Size << '\n';
-            throw safearray_error("Failed to allocate array.");
+
+            if (FATAL)
+            {
+                assert(false);
+            }
+            else
+            {
+                throw safearray_error("Failed to allocate array.");
+            }
         }
         return;
     }
@@ -75,6 +85,11 @@ public:
 
     void operator=(const SafeArray<T> &Other)
     {
+        if (!freed)
+        {
+            free();
+        }
+
         freed = false;
         size = Other.size;
         data = new T[size];
@@ -96,7 +111,14 @@ public:
         else
         {
             cout << "SafeArray error: Double free attempted.\n";
-            throw safearray_error("Double free attempted!");
+            if (FATAL)
+            {
+                assert(false);
+            }
+            else
+            {
+                throw safearray_error("Double free attempted!");
+            }
         }
         return;
     }
@@ -106,16 +128,52 @@ public:
         if (freed)
         {
             cout << "SafeArray error: Cannot access freed data.\n";
-            throw safearray_error("Freed access attempted!");
+            if (FATAL)
+            {
+                assert(false);
+            }
+            else
+            {
+                throw safearray_error("Freed access attempted!");
+            }
         }
-        else if (I < 0 || I >= size)
+        else if (I >= 0 && I >= size)
         {
             cout << "SafeArray error: Access denied to illegal element " << I
                  << ". Size: " << size << ".\n";
-            throw safearray_error("Illegal access attempted!");
+            if (FATAL)
+            {
+                assert(false);
+            }
+            else
+            {
+                throw safearray_error("Illegal access attempted!");
+            }
+        }
+        else if (I < 0 && I < -size)
+        {
+            cout << "SafeArray error: Access denied to illegal element " << I
+                 << ". Size: " << size << ".\n";
+            if (FATAL)
+            {
+                assert(false);
+            }
+            else
+            {
+                throw safearray_error("Illegal access attempted!");
+            }
         }
 
-        return data[I];
+        if (I >= 0)
+        {
+            return data[I];
+        }
+
+        // Creature comfort
+        else
+        {
+            return data[size + I];
+        }
     }
 
     int getSize() const
@@ -123,10 +181,16 @@ public:
         return size;
     }
 
+    // HIGHLY UNSAFE! (But pointer casting is my favorite hobby)
+    void *bytes() const
+    {
+        return data;
+    }
+
 protected:
-    T *data;
     int size;
     bool freed;
+    T *data;
 };
 
 #endif
