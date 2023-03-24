@@ -236,20 +236,21 @@ void NetworkLA::backprop(const vector<double> &Expected)
         gradientAggregate[i] *= actder(activations[-1][i]);
     }
 
-    for (int node = 0; node < sizes[numLayers - 1]; node++)
+    // Modify weights and biases for the last layer
+    for (int node = 0; node < sizes[-1]; node++)
     {
         // Iterate through weights
-        for (int weight = 0; weight < sizes[numLayers - 2]; weight++)
+        for (int weight = 0; weight < sizes[-2]; weight++)
         {
             // cout << "Adjusting weight " << layer << " " << node << " " << weight << '\n';
 
-            weightDeltas[numLayers - 2][node][weight] = activations[numLayers - 2][weight] * gradientAggregate[node];
+            weightDeltas[-2][node][weight] = activations[-2][weight] * gradientAggregate[node];
         }
 
         // cout << "Adjusting bias.\n";
 
         // Adjust bias
-        weightDeltas[numLayers - 2][node][-1] = gradientAggregate[node]; // bias
+        weightDeltas[-2][node][-1] = gradientAggregate[node]; // bias
     }
 
     // Iterate back through network
