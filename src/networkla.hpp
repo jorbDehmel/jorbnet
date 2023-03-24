@@ -17,10 +17,6 @@ GPLv3 held by author
 #include "misc/safeArray.hpp"
 using namespace std;
 
-#define WV 5
-#define MIN_STEP_SIZE 0.001
-#define MAX_STEP_SIZE 0.5
-
 // Get a random double between Min and Max
 double drand(const double &Min, const double &Max);
 
@@ -64,6 +60,8 @@ public:
     vector<dataset> trainingData;
     void train(const int &Num);
     double getError();
+
+    double minStepSize = 0.01, maxStepSize = 5, weightVariance = 5;
 
 protected:
     // Internal data structure containing network data

@@ -66,7 +66,7 @@ double dot(const SafeArray<double> &A, const SafeArray<double> &B)
 // What may change dimensions!
 void dotEquals(SafeArray<double> &What, const SafeArray<SafeArray<double>> &By)
 {
-    cout << "Beginning dot product...\n";
+    // cout << "Beginning dot product...\n";
 
     if (By[0].getSize() == What.getSize())
     {
@@ -96,11 +96,10 @@ void dotEquals(SafeArray<double> &What, const SafeArray<SafeArray<double>> &By)
     }
     else
     {
-        throw runtime_error("Dimensional mismatch: Cannot take dot product \
-                            or transposed dot product.");
+        throw runtime_error("Dimensional mismatch: Cannot take dot product or transposed dot product.");
     }
 
-    cout << "Completed dot product.\n";
+    // cout << "Completed dot product.\n";
 
     return;
 }
@@ -143,7 +142,7 @@ NetworkLA::NetworkLA(const vector<int> &Sizes)
 
             for (int weight = 0; weight < sizes[layer] + 1; weight++)
             {
-                weights[layer][node][weight] = drand(-WV, WV);
+                weights[layer][node][weight] = drand(-weightVariance, weightVariance);
             }
         }
     }
@@ -177,9 +176,9 @@ vector<double> NetworkLA::prop(const vector<double> &Input)
 
     // Return output layer
     vector<double> out;
-    for (int i = 0; i < sizes[numLayers - 1]; i++)
+    for (int i = 0; i < sizes[-1]; i++)
     {
-        out.push_back(activations[numLayers - 1][i]);
+        out.push_back(activations[-1][i]);
     }
 
     return out;
@@ -189,6 +188,7 @@ vector<double> NetworkLA::prop(const vector<double> &Input)
 void NetworkLA::backprop(const vector<double> &Expected)
 {
     // see wikipedia on backpropagation
+    // http://neuralnetworksanddeeplearning.com/chap2.html
     // ga^L := (f^L)' x \grad_{a^L}C
     // To start
     // Where x is hadamard product (element-wise)
@@ -216,17 +216,19 @@ void NetworkLA::backprop(const vector<double> &Expected)
     // = dot(gradientAggregate, activationsOfLayerBelow)
 
     // Calculate cumulative error
-    cout << "Getting cum error...\n"; // hehe
+    // cout << "Getting error...\n";
     double C = 0;
     for (int i = 0; i < sizes[numLayers - 1]; i++)
     {
-        C += pow(Expected[i] - activations[numLayers - 1][i], 2);
+        C += pow(Expected[i] - activations[-1][i], 2);
+        // cout << "Exp: " << Expected[i] << " act: " << activations[-1][i] << '\n';
     }
+    // cout << "Error: " << C << '\n';
 
     // Set up gradient aggregate as gradient of errors wrt final acts
     // Then hadamard-ed by vector of sigder of previous final act
 
-    cout << "Establishing GA...\n";
+    // cout << "Establishing GA...\n";
     SafeArray<double> gradientAggregate(Expected.size());
     for (int i = 0; i < gradientAggregate.getSize(); i++)
     {
@@ -234,57 +236,111 @@ void NetworkLA::backprop(const vector<double> &Expected)
         gradientAggregate[i] *= actder(activations[-1][i]);
     }
 
+    for (int node = 0; node < sizes[numLayers - 1]; node++)
+    {
+        // Iterate through weights
+        for (int weight = 0; weight < sizes[numLayers - 2]; weight++)
+        {
+            // cout << "Adjusting weight " << layer << " " << node << " " << weight << '\n';
+
+            weightDeltas[numLayers - 2][node][weight] = activations[numLayers - 2][weight] * gradientAggregate[node];
+        }
+
+        // cout << "Adjusting bias.\n";
+
+        // Adjust bias
+        weightDeltas[numLayers - 2][node][-1] = gradientAggregate[node]; // bias
+    }
+
     // Iterate back through network
-    cout << "Backpropogating...\n";
+    // cout << "Backpropogating...\n";
     for (int layer = numLayers - 2; layer >= 1; layer--)
     {
-        cout << "Starting layer " << layer << '\n';
+        // cout << "Starting layer " << layer << '\n';
 
-        cout << "GA size: " << gradientAggregate.getSize() << '\n'
-             << "Weights[layer] size: h = " << weights[layer].getSize() << " w = " << weights[layer][0].getSize() << '\n';
+        // cout << "GA size: " << gradientAggregate.getSize() << '\n'
+        //      << "Weights[layer] size: h = " << weights[layer].getSize() << " w = " << weights[layer][0].getSize() << '\n';
 
         // Dot product equals by weights of above layer
         dotEquals(gradientAggregate, weights[layer]);
 
-        cout << "Applying Hadamard product...\n";
+        // cout << "Applying Hadamard product...\n";
 
         // Hadamard equals by sigder of current layer act
-        for (int i = 0; i < gradientAggregate.getSize(); i++)
+        for (int i = 0; i < gradientAggregate.getSize() - 1; i++)
         {
             gradientAggregate[i] *= actder(activations[layer][i]);
         }
 
         // Compute weight deltas for this layer
-        // := dot(gradientAggregate, activationsOfBelowLevel);
 
-        cout << "Dotting...\n";
+        // cout << "Converting GA to grad wrt weights...\n";
 
-        // WTH?
-        weightDeltas[layer] = dot(gradientAggregate, activations[layer - 1]);
-        throw runtime_error("HOW");
+        // CONVERT GRADIENT AGGREGATE TO GRADIENT WRT WEIGHTS
+        // partial C wrt w^l_{jk} = a_k^{l-1} (ga)^l_j
+        // For layer l, for source node j, towards node k
+        // = (destination node's old act) (the jth item in ga)
+        // For bias: = (jth item in ga) or (node-th item in ga)
 
-        // FOR TESTING PURPOSES
-        cout << "Layer " << layer << " has gradient aggregate:\n";
-        for (int i = 0; i < gradientAggregate.getSize(); i++)
+        for (int node = 0; node < sizes[layer]; node++)
         {
-            cout << '\t' << gradientAggregate[i] << '\n';
+            // Iterate through weights
+            for (int weight = 0; weight < sizes[layer - 1]; weight++)
+            {
+                // cout << "Adjusting weight " << layer << " " << node << " " << weight << '\n';
+
+                weightDeltas[layer - 1][node][weight] = activations[layer - 1][weight] * gradientAggregate[node];
+            }
+
+            // cout << "Adjusting bias.\n";
+
+            // Adjust bias
+            weightDeltas[layer - 1][node][-1] = gradientAggregate[node]; // bias
         }
+
+        // Remove bias from gradient aggregate for next layer
+        gradientAggregate.setSize(-1);
     }
 
-    cout << "Done. Performing stochastic gradient descent...\n";
-
-    // Modify weights by computed gradient values
-    double coefficient = drand(MIN_STEP_SIZE, MAX_STEP_SIZE);
+    // Find magnitude for unit-vector-ification
+    double magnitude = 0;
     for (int layer = 1; layer < numLayers; layer++)
     {
         for (int node = 0; node < sizes[layer]; node++)
         {
-            for (int weight = 0; weight < weights[layer][node].getSize(); weight++)
+            for (int weight = 0; weight < weights[layer - 1][node].getSize(); weight++)
             {
-                weights[layer][node][weight] -= coefficient * weightDeltas[layer][node][weight];
+                magnitude += pow(weightDeltas[layer - 1][node][weight], 2);
             }
         }
     }
+    magnitude = sqrt(magnitude);
+
+    // Prevent error from cascading into nan's forever
+    if (magnitude == 0)
+    {
+        magnitude = 1;
+    }
+
+    // cout << "Done. Performing stochastic gradient descent...\n";
+
+    // Modify weights by computed gradient values
+    double coefficient = drand(minStepSize, maxStepSize) / magnitude;
+    // cout << "Coeff: " << coefficient << '\n';
+
+    for (int layer = 1; layer < numLayers; layer++)
+    {
+        for (int node = 0; node < sizes[layer]; node++)
+        {
+            for (int weight = 0; weight < weights[layer - 1][node].getSize(); weight++)
+            {
+                // cout << "l " << layer << " n " << node << " w " << weight << " by " << coefficient * weightDeltas[layer - 1][node][weight] << '\n';
+                weights[layer - 1][node][weight] -= coefficient * weightDeltas[layer - 1][node][weight];
+            }
+        }
+    }
+
+    // cout << "Finished.\n";
 
     // Die because this algorithm sucks hardcore
 
@@ -305,40 +361,101 @@ double NetworkLA::bdot(SafeArray<double> Inputs, SafeArray<double> Weights, cons
     return out;
 }
 
+void NetworkLA::train(const int &Num)
+{
+    for (int i = 0; i < Num; i++)
+    {
+        // Choose random dataset
+        int choice = random() % trainingData.size();
+        vector<double> inp = trainingData[choice].input;
+        vector<double> exp = trainingData[choice].output;
+
+        // Train on the selected dataset
+        prop(inp);
+        backprop(exp);
+    }
+    return;
+}
+
+double NetworkLA::getError()
+{
+    double sum = 0;
+
+    for (auto set : trainingData)
+    {
+        auto obs = prop(set.input);
+        for (int i = 0; i < set.output.size(); i++)
+        {
+            sum += pow(set.output[i] - obs[i], 2);
+        }
+    }
+
+    return sum;
+}
+
 #include <chrono>
+
 int main()
 {
     srand(time(NULL));
 
-    vector<int> sizes = {3, 5, 10, 2, 5};
+    vector<int> sizes = {2, 5, 2};
     NetworkLA n(sizes);
-    n.act = __ReLU;
-    n.actder = __ReLUder;
+    n.act = __sigmoid;
+    n.actder = __sigder;
 
-    vector<double> inp = {1, 2, 3};
+    n.trainingData.push_back(dataset{{0, 0}, {0, 1}});
+    n.trainingData.push_back(dataset{{0, 1}, {1, 0}});
+    n.trainingData.push_back(dataset{{1, 0}, {1, 0}});
+    n.trainingData.push_back(dataset{{1, 1}, {0, 1}});
 
-    auto start = chrono::high_resolution_clock::now();
+    cout << "Total error pre-training: " << n.getError() << '\n';
 
-    auto out = n.prop(inp);
-
-    auto end = chrono::high_resolution_clock::now();
-    int elapsed = chrono::duration_cast<chrono::nanoseconds>(end - start).count();
-
-    cout << "Propogation took " << elapsed << " ns.\n";
-
-    for (auto i : out)
+    vector<double> errors;
+    for (int i = 0; i < 1000; i++)
     {
-        cout << i << '\n';
+        n.train(1);
+        errors.push_back(n.getError());
     }
 
-    start = chrono::high_resolution_clock::now();
+    /*
+    for (int i = 1; i < errors.size(); i++)
+    {
+        cout << errors[i] << '\n';
+        if (errors[i] > errors[i - 1])
+        {
+            cout << "A TRAINING PASS RESULTED IN INCREASED ERROR\n"
+                 << "Difference: " << errors[i - 1] - errors[i] << '\n';
+        }
+    }*/
 
-    n.backprop({1, 2, 3, 4, 5});
+    for (auto set : n.trainingData)
+    {
+        // Display input
+        for (auto i : set.input)
+        {
+            cout << i << ' ';
+        }
+        cout << ":\t";
 
-    end = chrono::high_resolution_clock::now();
-    elapsed = chrono::duration_cast<chrono::nanoseconds>(end - start).count();
+        // Display output (rounded)
+        auto obs = n.prop(set.input);
+        for (auto o : obs)
+        {
+            cout << o << " (" << (int)(o + 0.5) << ")\t";
+        }
+        cout << '\n';
 
-    cout << "Backpropogation took " << elapsed << " ns.\n";
+        // Display expected
+        cout << "Exp: ";
+        for (auto e : set.output)
+        {
+            cout << e << " ";
+        }
+        cout << "\n\n";
+    }
+
+    cout << "Total error post-training: " << n.getError() << "\n\n";
 
     return 0;
 }

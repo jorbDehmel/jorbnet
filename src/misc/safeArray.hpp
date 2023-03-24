@@ -30,7 +30,7 @@ public:
     SafeArray()
     {
         freed = true;
-        size = 0;
+        maxSize = size = 0;
         data = nullptr;
         return;
     }
@@ -40,7 +40,7 @@ public:
         try
         {
             freed = false;
-            size = Size;
+            maxSize = size = Size;
             data = new T[size];
         }
         catch (...)
@@ -63,7 +63,7 @@ public:
     SafeArray(SafeArray<T> &Other)
     {
         freed = false;
-        size = Other.size;
+        maxSize = size = Other.size;
         data = new T[size];
         for (int i = 0; i < size; i++)
         {
@@ -91,7 +91,7 @@ public:
         }
 
         freed = false;
-        size = Other.size;
+        maxSize = size = Other.size;
         data = new T[size];
         for (int i = 0; i < size; i++)
         {
@@ -107,6 +107,7 @@ public:
             delete[] data;
             data = nullptr;
             freed = true;
+            maxSize = size = 0;
         }
         else
         {
@@ -187,8 +188,34 @@ public:
         return data;
     }
 
+    void setSize(const int &To)
+    {
+        if (To > maxSize || To < -maxSize)
+        {
+            if (FATAL)
+            {
+                assert(false);
+            }
+            else
+            {
+                throw safearray_error("Illegal access attempted!");
+            }
+        }
+        else if (To > 0)
+        {
+            size = To;
+        }
+        else if (To < 0)
+        {
+            size += To;
+        }
+
+        return;
+    }
+
 protected:
     int size;
+    int maxSize;
     bool freed;
     T *data;
 };
