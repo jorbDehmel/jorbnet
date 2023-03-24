@@ -29,21 +29,21 @@ dataset loadBMP(const string &Filepath, const int &W, const int &H,
         switch (M)
         {
         case RGBA:
-            out.inputs.push_back(r);
-            out.inputs.push_back(g);
-            out.inputs.push_back(b);
-            out.inputs.push_back(a);
+            out.input.push_back(r);
+            out.input.push_back(g);
+            out.input.push_back(b);
+            out.input.push_back(a);
             break;
         case RGB:
-            out.inputs.push_back(r);
-            out.inputs.push_back(g);
-            out.inputs.push_back(b);
+            out.input.push_back(r);
+            out.input.push_back(g);
+            out.input.push_back(b);
             break;
         case BW_double:
-            out.inputs.push_back((r + g + b) / 3.0);
+            out.input.push_back((r + g + b) / 3.0);
             break;
         case BW_char:
-            out.inputs.push_back((unsigned char)((r + g + b) / 3.0));
+            out.input.push_back((unsigned char)((r + g + b) / 3.0));
             break;
         default:
             throw runtime_error("Invalid mode selection; Cannot open .bmp file.");
@@ -55,7 +55,7 @@ dataset loadBMP(const string &Filepath, const int &W, const int &H,
 
     for (auto exp : Expected)
     {
-        out.expected.push_back(exp);
+        out.output.push_back(exp);
     }
 
     return out;
@@ -112,9 +112,9 @@ vector<dataset> addNoise(const dataset &To, const double &Amount, const int &Num
     for (int i = 0; i < NumOutputs; i++)
     {
         dataset toAdd = To;
-        for (int j = 0; j < toAdd.inputs.size(); j++)
+        for (int j = 0; j < toAdd.input.size(); j++)
         {
-            toAdd.inputs[j] += drand(-Amount, Amount);
+            toAdd.input[j] += drand(-Amount, Amount);
         }
         out.push_back(toAdd);
     }

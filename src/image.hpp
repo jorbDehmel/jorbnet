@@ -9,7 +9,7 @@ GPLv3 held by author
 #ifndef IMAGEHANDLING_HPP
 #define IMAGEHANDLING_HPP
 
-#include "resources.hpp"
+#include "network.hpp"
 #include <SDL2/SDL.h>
 #include <string>
 using namespace std;

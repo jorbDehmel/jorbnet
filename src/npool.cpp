@@ -8,55 +8,48 @@ GPLv3 held by author
 
 #include "npool.hpp"
 
-npool::npool(network &Starter, const int &Num, const int &Cull, const int &CullInterval)
+NPool::NPool(Network &Starter, const int &Num, const int &Cull, const int &CullInterval)
 {
     cull = Cull;
     cullInterval = CullInterval;
     passes = 0;
     num = Num;
 
-    networks = new network *[num];
-    assert(networks != nullptr);
+    networks = SafeArray<Network *>(num);
 
-    networks[0] = new network(Starter);
+    networks[0] = new Network(Starter);
     assert(networks[0] != nullptr);
 
     for (int i = 1; i < num; i++)
     {
-        networks[i] = new network(Starter);
+        networks[i] = new Network(Starter);
         assert(networks[i] != nullptr);
 
-        for (int layer = 1; layer < networks[i]->sizes.size(); layer++)
+        for (auto w : networks[i]->getWeights())
         {
-            for (int node = 0; node < networks[i]->sizes[layer]; node++)
-            {
-                for (int weight = 0; weight < networks[i]->nodes[layer][node].links.size(); weight++)
-                {
-                    networks[i]->nodes[layer][node].weights[weight] += drand(-WEIGHT_VARIATION, WEIGHT_VARIATION);
-                }
-            }
+            *w += drand(-Starter.weightVariance, Starter.weightVariance);
         }
     }
+
     return;
 }
 
-npool::~npool()
+NPool::~NPool()
 {
     for (int i = 0; i < num; i++)
     {
         delete networks[i];
     }
-    delete[] networks;
     return;
 }
 
-void __threadTrain(network *ToCall, const int &TrainFor)
+void __threadTrain(Network *ToCall, const int &TrainFor)
 {
     ToCall->train(TrainFor);
     return;
 }
 
-void npool::train(const int &NumTimes, const bool &PrintUpdates)
+void NPool::train(const int &NumTimes, const bool &PrintUpdates)
 {
     for (int i = 0; i < NumTimes; i += cullInterval)
     {
@@ -66,8 +59,7 @@ void npool::train(const int &NumTimes, const bool &PrintUpdates)
         }
 
         // Start training
-        thread **threads = new thread *[num];
-        assert(threads != nullptr);
+        SafeArray<thread *> threads(num);
 
         for (int n = 0; n < num; n++)
         {
@@ -81,8 +73,6 @@ void npool::train(const int &NumTimes, const bool &PrintUpdates)
             threads[n]->join();
             delete threads[n];
         }
-
-        delete[] threads;
 
         // Cull
         int size = num;
@@ -99,7 +89,7 @@ void npool::train(const int &NumTimes, const bool &PrintUpdates)
                 {
                     indexOfLeastAccurate = j;
                 }
-                else if (networks[j]->errors.back() > networks[indexOfLeastAccurate]->errors.back())
+                else if (networks[j]->getError() > networks[indexOfLeastAccurate]->getError())
                 {
                     indexOfLeastAccurate = j;
                 }
@@ -124,7 +114,7 @@ void npool::train(const int &NumTimes, const bool &PrintUpdates)
             {
                 indexOfMostAccurate = j;
             }
-            else if (networks[j]->errors.back() < networks[indexOfMostAccurate]->errors.back())
+            else if (networks[j]->getError() < networks[indexOfMostAccurate]->getError())
             {
                 indexOfMostAccurate = j;
             }
@@ -139,11 +129,12 @@ void npool::train(const int &NumTimes, const bool &PrintUpdates)
             }
             else
             {
-                networks[j] = new network(*networks[indexOfMostAccurate]);
+                networks[j] = new Network(*networks[indexOfMostAccurate]);
                 assert(networks[j] != nullptr);
-                for (auto w : networks[j]->weights)
+
+                for (auto w : networks[j]->getWeights())
                 {
-                    *w += drand(-WEIGHT_VARIATION, WEIGHT_VARIATION);
+                    *w += drand(-networks[indexOfMostAccurate]->weightVariance, networks[indexOfMostAccurate]->weightVariance);
                 }
             }
         }
@@ -151,7 +142,7 @@ void npool::train(const int &NumTimes, const bool &PrintUpdates)
     return;
 }
 
-network npool::best()
+Network NPool::best()
 {
     int indexOfBest = 0;
     for (int i = 1; i < num; i++)
@@ -160,15 +151,11 @@ network npool::best()
         {
             continue;
         }
-        else if (networks[i]->errors.size() == 0)
-        {
-            continue;
-        }
         else if (networks[indexOfBest] == nullptr)
         {
             indexOfBest = i;
         }
-        else if (networks[i]->errors.back() < networks[indexOfBest]->errors.back())
+        else if (networks[i]->getError() < networks[indexOfBest]->getError())
         {
             indexOfBest = i;
         }

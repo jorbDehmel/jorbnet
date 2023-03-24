@@ -9,24 +9,25 @@ GPLv3 held by author
 #ifndef NPOOL_HPP
 #define NPOOL_HPP
 
-#include "resources.hpp"
 #include "networkSave.hpp"
 #include "network.hpp"
 #include <thread>
 using namespace std;
 
-class npool
+class NPool
 {
 public:
-    npool(network &Starter, const int &Num, const int &Cull, const int &CullInterval);
-    ~npool();
+    NPool(Network &Starter, const int &Num, const int &Cull, const int &CullInterval);
+    ~NPool();
 
     int cull, cullInterval, passes, num;
     double minVar = 1;
-    network **networks;
+
+    SafeArray<Network *> networks;
+    // Network **networks;
 
     void train(const int &Num, const bool &PrintUpdates = false);
-    network best();
+    Network best();
 };
 
 #endif

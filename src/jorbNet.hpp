@@ -14,7 +14,6 @@ GPLv3 held by author
 #ifndef JORBNET_HPP
 #define JORBNET_HPP
 
-#include "resources.hpp"
 #include "networkSave.hpp"
 #include "npool.hpp"
 #include "image.hpp"

@@ -25,10 +25,10 @@ int main(const int argc, const char *argv[])
         dataset imgrgb = loadBMP("test.bmp", 8, 8, {1}, BW_char);
 
         dataset blank;
-        blank.expected = {0};
-        for (int i = 0; i < imgrgb.inputs.size(); i++)
+        blank.output = {0};
+        for (int i = 0; i < imgrgb.input.size(); i++)
         {
-            blank.inputs.push_back(0);
+            blank.input.push_back(0);
         }
 
         const int num = 10;
@@ -36,7 +36,7 @@ int main(const int argc, const char *argv[])
         vector<dataset> fuzzedImage = addNoise(imgrgb, 5, num);
         vector<dataset> fuzzedBlank = addNoise(blank, 5, num);
 
-        network n({(int)fuzzedImage[0].inputs.size(), 20, 1});
+        Network n({(int)fuzzedImage[0].input.size(), 20, 1});
         for (auto a : fuzzedImage)
         {
             n.trainingData.push_back(a);
@@ -51,17 +51,17 @@ int main(const int argc, const char *argv[])
         auto end = chrono_now();
         cout << "Trained. Seconds: " << chrono_ns(end - start) << '\n';
 
-        cout << "Error: " << n.errors.back() << '\n';
+        cout << "Error: " << n.getError() << '\n';
 
         saveNetwork("bestImage.nn", n);
     }
     else
     {
-        network n = loadNetwork("bestImage.nn");
-        double prevError = n.errors.back();
+        Network n = loadNetwork("bestImage.nn");
+        double prevError = n.getError();
 
         // Error hop
-        for (auto w : n.weights)
+        for (auto w : n.getWeights())
         {
             *w += drand(-1, 1);
         }
@@ -74,11 +74,11 @@ int main(const int argc, const char *argv[])
 
         cout << "Passes after: " << n.passes << '\n';
 
-        cout << "Trained. Seconds: " << chrono_ns(end - start) << '\n';
+        cout << "Trained. Nanoseconds: " << chrono_ns(end - start) << '\n';
 
-        cout << "Error: " << n.errors.back() << '\n';
+        cout << "Error: " << n.getError() << '\n';
 
-        if (n.errors.back() < prevError)
+        if (n.getError() < prevError)
             saveNetwork("bestImage.nn", n);
         else
             cout << "Did not save.\n";

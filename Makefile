@@ -4,7 +4,7 @@
 #####################################################
 
 STEM = clang++ -pedantic -Wall -Werror -g
-OBJECTS = build/npool.o build/resources.o build/networkSave.o build/image.o build/network.o build/sockstream.o
+OBJECTS = build/npool.o build/networkSave.o build/image.o build/network.o
 
 #####################################################
 
@@ -38,9 +38,6 @@ build/npool.o:	src/npool.hpp src/npool.cpp
 	mkdir -p build
 	$(STEM) -c -o build/npool.o src/npool.cpp -pthread
 
-build/resources.o:	src/resources.hpp src/resources.cpp
-	$(STEM) -c -o build/resources.o src/resources.cpp
-
 build/networkSave.o:	src/networkSave.hpp src/networkSave.cpp
 	$(STEM) -c -o build/networkSave.o src/networkSave.cpp
 
@@ -49,9 +46,6 @@ build/image.o:	src/image.hpp src/image.cpp
 
 build/network.o:	src/network.hpp src/network.cpp
 	$(STEM) -c -o build/network.o src/network.cpp
-
-build/sockstream.o: src/misc/sockstream.hpp src/misc/sockstream.hpp
-	$(STEM) -c -o build/sockstream.o src/misc/sockstream.cpp -pthread
 
 #####################################################
 

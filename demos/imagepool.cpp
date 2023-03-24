@@ -8,10 +8,10 @@ int main()
     dataset imgrgb = loadBMP("test.bmp", 8, 8, {1}, BW_char);
 
     dataset blank;
-    blank.expected = {0};
-    for (int i = 0; i < imgrgb.inputs.size(); i++)
+    blank.output = {0};
+    for (int i = 0; i < imgrgb.input.size(); i++)
     {
-        blank.inputs.push_back(0);
+        blank.input.push_back(0);
     }
 
     const int num = 10;
@@ -19,7 +19,7 @@ int main()
     vector<dataset> fuzzedImage = addNoise(imgrgb, 5, num);
     vector<dataset> fuzzedBlank = addNoise(blank, 5, num);
 
-    network n({(int)fuzzedImage[0].inputs.size(), 20, 1});
+    Network n({(int)fuzzedImage[0].input.size(), 20, 1});
     for (auto a : fuzzedImage)
     {
         n.trainingData.push_back(a);
@@ -29,7 +29,7 @@ int main()
         n.trainingData.push_back(a);
     }
 
-    npool p(n, 10, 7, 5);
+    NPool p(n, 10, 7, 5);
 
     n.train(1);
 
@@ -38,10 +38,10 @@ int main()
     auto end = chrono_now();
     cout << "Trained. Time: " << toTime(chrono_ns(end - start)) << '\n';
 
-    network best = p.best();
+    Network best = p.best();
     best.train(1);
-    cout << "Error: " << best.errors.back() << '\n';
-    cout << "Initial error: " << n.errors.back() << '\n';
+    cout << "Error: " << best.getError() << '\n';
+    cout << "Initial error: " << n.getError() << '\n';
 
     saveNetwork("bestImagePool.nn", best);
 }

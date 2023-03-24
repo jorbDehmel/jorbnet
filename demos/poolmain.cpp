@@ -17,33 +17,33 @@ int main()
 
     // Trained to be a XOR and an AND gate
     dataset a;
-    a.inputs = {0, 0};
-    a.expected = {1, 0};
+    a.input = {0, 0};
+    a.output = {1, 0};
 
     dataset b;
-    b.inputs = {0, 1};
-    b.expected = {0, 0};
+    b.input = {0, 1};
+    b.output = {0, 0};
 
     dataset c;
-    c.inputs = {1, 0};
-    c.expected = {0, 0};
+    c.input = {1, 0};
+    c.output = {0, 0};
 
     dataset d;
-    d.inputs = {1, 1};
-    d.expected = {1, 1};
+    d.input = {1, 1};
+    d.output = {1, 1};
 
     vector<int> sizes = {2, 10, 2};
-    network n(sizes);
+    Network n(sizes);
     n.trainingData = {a, b, c, d};
 
-    npool p(n, 10, 7, 10);
+    NPool p(n, 10, 7, 10);
 
     auto start = chrono::high_resolution_clock::now();
     p.train(1000);
     auto end = chrono::high_resolution_clock::now();
 
     long long ellapsed = chrono::duration_cast<chrono::nanoseconds>(end - start).count();
-    double lastError = p.best().errors.back();
+    double lastError = p.best().getError();
     double errorNs = ellapsed * lastError;
 
     cout << "Ellapsed ns: " << ellapsed << '\n'

@@ -8,31 +8,33 @@ GPLv3 held by author
 
 #include "networkSave.hpp"
 
-void saveNetwork(ostream &Stream, network &From)
+void saveNetwork(ostream &Stream, Network &From)
 {
     // Save passes
     Stream << From.passes << "\n\n";
 
     // Save sizes
-    Stream << From.sizes.size() << '\n';
-    for (auto s : From.sizes)
+    Stream << From.sizes.getSize() << '\n';
+    for (int i = 0; i < From.sizes.getSize(); i++)
     {
-        Stream << s << '\t';
+        Stream << From.sizes[i] << '\t';
     }
     Stream << "\n\n";
 
     // Save nodes
-    for (int layer = 1; layer < From.sizes.size(); layer++)
+    for (int layer = 1; layer < From.sizes.getSize(); layer++)
     {
         for (int node = 0; node < From.sizes[layer]; node++)
         {
             // Activation and bias
-            Stream << From.nodes[layer][node].act << '\t' << From.nodes[layer][node].bias << '\n';
+            Stream << From.activations[layer][node] << '\t' << From.weights[layer - 1][node][-1] << '\n';
+            // Stream << From.nodes[layer][node].act << '\t' << From.nodes[layer][node].bias << '\n';
 
             // Weights
             for (int weight = 0; weight < From.sizes[layer - 1]; weight++)
             {
-                Stream << From.nodes[layer][node].weights[weight] << '\t';
+                Stream << From.weights[layer - 1][node][weight] << '\t';
+                // Stream << From.nodes[layer][node].weights[weight] << '\t';
             }
             Stream << '\n';
         }
@@ -43,15 +45,15 @@ void saveNetwork(ostream &Stream, network &From)
     Stream << From.trainingData.size() << '\n';
     for (int i = 0; i < From.trainingData.size(); i++)
     {
-        Stream << From.trainingData[i].inputs.size() << '\n';
-        for (auto inp : From.trainingData[i].inputs)
+        Stream << From.trainingData[i].input.size() << '\n';
+        for (auto inp : From.trainingData[i].input)
         {
             Stream << inp << '\t';
         }
         Stream << '\n';
 
-        Stream << From.trainingData[i].expected.size() << '\n';
-        for (auto exp : From.trainingData[i].expected)
+        Stream << From.trainingData[i].output.size() << '\n';
+        for (auto exp : From.trainingData[i].output)
         {
             Stream << exp << '\t';
         }
@@ -59,16 +61,13 @@ void saveNetwork(ostream &Stream, network &From)
     }
     Stream << '\n';
 
-    // Save error history
-    for (auto e : From.errors)
-    {
-        Stream << e << '\t';
-    }
+    // Save error
+    Stream << From.getError() << '\t';
 
     return;
 }
 
-void saveNetwork(const string &Filename, network &From)
+void saveNetwork(const string &Filename, Network &From)
 {
     ofstream file(Filename);
     assert(file.is_open());
@@ -79,7 +78,7 @@ void saveNetwork(const string &Filename, network &From)
     return;
 }
 
-network loadNetwork(istream &Stream)
+Network loadNetwork(istream &Stream)
 {
     // Load passes
     int passes;
@@ -97,21 +96,23 @@ network loadNetwork(istream &Stream)
         sizes.push_back(layerSize);
     }
 
-    // Create network using constructor
-    network out(sizes);
+    // Create Network using constructor
+    Network out(sizes);
 
     // Load nodes
-    for (int layer = 1; layer < out.sizes.size(); layer++)
+    for (int layer = 1; layer < out.sizes.getSize(); layer++)
     {
         for (int node = 0; node < out.sizes[layer]; node++)
         {
             // Activation and bias
-            Stream >> out.nodes[layer][node].act >> out.nodes[layer][node].bias;
+            Stream >> out.activations[layer][node] >> out.weights[layer - 1][node][-1];
+            // Stream >> out.nodes[layer][node].act >> out.nodes[layer][node].bias;
 
             // Weights
             for (int weight = 0; weight < out.sizes[layer - 1]; weight++)
             {
-                Stream >> out.nodes[layer][node].weights[weight];
+                Stream >> out.weights[layer - 1][node][weight];
+                // Stream >> out.nodes[layer][node].weights[weight];
             }
         }
     }
@@ -128,7 +129,7 @@ network loadNetwork(istream &Stream)
         {
             double temp;
             Stream >> temp;
-            toAdd.inputs.push_back(temp);
+            toAdd.input.push_back(temp);
         }
 
         Stream >> dataSize;
@@ -136,30 +137,23 @@ network loadNetwork(istream &Stream)
         {
             double temp;
             Stream >> temp;
-            toAdd.expected.push_back(temp);
+            toAdd.output.push_back(temp);
         }
 
         out.trainingData.push_back(toAdd);
     }
 
-    // Load error history
-    while (!Stream.eof())
-    {
-        double error;
-        Stream >> error;
-        out.errors.push_back(error);
-    }
     out.passes = passes;
 
     return out;
 }
 
-network loadNetwork(const string &Filename)
+Network loadNetwork(const string &Filename)
 {
     ifstream file(Filename);
     assert(file.is_open());
 
-    network out = loadNetwork(file);
+    Network out = loadNetwork(file);
 
     file.close();
     return out;

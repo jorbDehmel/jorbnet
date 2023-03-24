@@ -12,8 +12,8 @@ all: main.out npool.out image.out imagepool.out
 
 #####################################################
 
-main.out:	oopnn.cpp /usr/include/jorbnet
-	$(STEM) -o main.out oopnn.cpp `jorbnet-flags`
+main.out:	network.cpp /usr/include/jorbnet
+	$(STEM) -o main.out network.cpp `jorbnet-flags`
 
 npool.out:	poolmain.cpp /usr/include/jorbnet
 	$(STEM) -o npool.out poolmain.cpp `jorbnet-flags`

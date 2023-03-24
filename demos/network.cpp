@@ -10,54 +10,30 @@ GPLv3 held by author
 #include "../src/jorbNet.hpp"
 using namespace std;
 
-vector<double> dataToGraph;
-int item = 0;
-bool graph(double &X, double &Y)
-{
-    // Failsafe
-    if (dataToGraph.size() <= 1)
-    {
-        X = Y = 0;
-        return false;
-    }
-
-    if (item >= dataToGraph.size())
-    {
-        item = 0;
-        return false;
-    }
-
-    X = item;
-    Y = dataToGraph[item];
-
-    item++;
-    return true;
-}
-
 int main()
 {
     srand(time(NULL));
 
     // Trained to be a XOR and an AND gate
     dataset a;
-    a.inputs = {0, 0};
-    a.expected = {1, 0};
+    a.input = {0, 0};
+    a.output = {1, 0};
 
     dataset b;
-    b.inputs = {0, 1};
-    b.expected = {0, 0};
+    b.input = {0, 1};
+    b.output = {0, 1};
 
     dataset c;
-    c.inputs = {1, 0};
-    c.expected = {0, 0};
+    c.input = {1, 0};
+    c.output = {0, 1};
 
     dataset d;
-    d.inputs = {1, 1};
-    d.expected = {1, 1};
+    d.input = {1, 1};
+    d.output = {1, 0};
 
-    vector<int> sizes = {2, 10, 2};
+    vector<int> sizes = {2, 5, 2};
 
-    network n(sizes);
+    Network n(sizes);
 
     n.trainingData = {a, b, c, d};
 
@@ -66,15 +42,12 @@ int main()
     auto end = chrono::high_resolution_clock::now();
 
     int ellapsed = chrono::duration_cast<chrono::nanoseconds>(end - start).count();
-    double lastError = n.errors.back();
+    double lastError = n.getError();
     double errorNs = ellapsed * lastError;
 
     cout << "Ellapsed ns: " << ellapsed << '\n'
-         << "Final error: " << lastError << '\n'
+         << "Final error: " << lastError << " (" << (int)(lastError + 0.5) << ")\n"
          << "Network error-NS evaluation: " << errorNs << '\n';
-
-    // graphNetworkError(n);
-    // saveNetwork("hi.nn", n);
 
     return 0;
 }
