@@ -355,6 +355,113 @@ our Order of complexity is now much better (through observation). This allows us
 train vastly larger models. In the same time it used to take us to train a $[64, 20, 1]$
 network once, we can now train a $[16384, 20, 1]$ model (a 128x128-pixel image) 10 times.
 
+\section{Creating an Activation Function}
+
+An activation function can be any function mapping
+a node's weighted sum of inputs to its activation, so
+long as an accompianing derivative can be meaningfully
+defined and expressed in terms of its value (such that,
+given its activation, the derivative can be found).
+
+As a first-order ordinary differential equation, the
+following must hold:
+\[
+    f' = g(f)
+\]
+
+For example, consider the Sigmoid function.
+
+\[
+    f(x) = \frac{1}{1 + e^{-x}} \\
+    f'(x) = f(x) (1 - f(x)) \\
+    f'(f(x)) = f(x) (1 - f(x)) \\
+    f'(f) = f (1 - f) \\
+    f' = g(f) | g(x) = x (1 - x) \\
+\]
+
+Thus,
+
+\begin{verbatim}
+double sigmoid(const double &X)
+{
+    return 1 / (1 + pow(E_M, -X));
+}
+double sigder(const double &Act)
+{
+    return Act * (1 - Act);
+}
+\end{verbatim}
+
+Or consider ReLU (in pseudo-C++ instead of piecewise notation).
+
+\[
+    f(x) = (x > 0) ? x : 0 \\
+    f'(x) = (x > 0) ? 1 : 0 \\
+    f'(f(x)) = (f(x) != 0) ? 1 : 0 \\
+    f'(f) = (f != 0) ? 1 : 0 \\
+    f' = (f != 0) ? 1 : 0 \\
+    f' = g(f) | g(x) = (x != 0) ? 1 : 0 \\
+\]
+
+Thus,
+
+\begin{verbatim}
+double ReLU(const double &X)
+{
+    return (x > 0) ? X : 0;
+}
+double ReLUder(const double &Act)
+{
+    return (Act != 0) ? 1 : 0;
+}
+\end{verbatim}
+
+Or consider the unit function.
+
+\[
+    f(x) = x \\
+    f'(x) = 1 \\
+    f'(f(x)) = 1 \\
+    f'(f) =1 \\
+    f' = g(f) | g(x) = 1 \\
+\]
+
+Thus,
+
+\begin{verbatim}
+double unit(const double &X)
+{
+    return X;
+}
+double unitder(const double &Act)
+{
+    return 1;
+}
+\end{verbatim}
+
+For fun, consider $sin(x)$.
+
+\[
+    f(x) = sin(x) \\
+    f'(x) = cos(x) \\
+    f'(f(x)) = cos(arcsin(f(x))) \\
+    f'(f) = cos(arcsin(f)) \\
+    f' = g(f) | g(x) = cos(arcsin(x)) \\
+\]
+
+Thus,
+
+\begin{verbatim}
+double sinAct(const double &X)
+{
+    return sin(X);
+}
+double sinActDer(const double &Act)
+{
+    return cos(asin(X));
+}
+\end{verbatim}
+
 \section{Sources}
 
 https://en.wikipedia.org/wiki/Backpropagation \\

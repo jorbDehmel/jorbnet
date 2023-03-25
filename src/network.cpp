@@ -104,6 +104,16 @@ double __ReLUder(const double &Act)
     }
 }
 
+double __lin(const double &X)
+{
+    return X;
+}
+
+double __linder(const double &Act)
+{
+    return 1;
+}
+
 double dot(const SafeArray<double> &A, const SafeArray<double> &B)
 {
     assert(A.getSize() == B.getSize());

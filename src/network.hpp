@@ -36,6 +36,11 @@ double __sigder(const double &Act);
 double __ReLU(const double &X);
 double __ReLUder(const double &Act);
 
+// Linear activation function and derivative (not that useful)
+double __lin(const double &X);
+double __linder(const double &Act);
+
+// Helper functions for linear algebra
 double dot(const SafeArray<double> &A, const SafeArray<double> &B);
 void dotEquals(SafeArray<double> &What, const SafeArray<SafeArray<double>> &By);
 

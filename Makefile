@@ -10,7 +10,7 @@ OBJECTS = build/npool.o build/networkSave.o build/image.o build/network.o
 
 install: /usr/include/jorbnet
 
-/usr/include/jorbnet:	/usr/include/jgraph libjorbnet.a /usr/bin/jorbnet-flags docs
+/usr/include/jorbnet:	libjorbnet.a /usr/bin/jorbnet-flags docs
 	sudo rm -rf /usr/include/jorbnet
 	sudo mkdir -p /usr/include/jorbnet
 	sudo cp -rf src/*.hpp /usr/include/jorbnet
@@ -20,13 +20,6 @@ install: /usr/include/jorbnet
 
 libjorbnet.a:	$(OBJECTS)
 	ar -rsv libjorbnet.a $(OBJECTS)
-
-/usr/include/jgraph:
-	git clone https://github.com/jorbDehmel/jgraph
-	$(MAKE) -C jgraph/jgraph
-	make install
-	cd ../..
-	rm -rf jgraph
 
 /usr/bin/jorbnet-flags:	jorbnet-flags.sh
 	chmod +x jorbnet-flags.sh
