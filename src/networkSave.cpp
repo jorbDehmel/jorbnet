@@ -11,58 +11,50 @@ GPLv3 held by author
 void saveNetwork(ostream &Stream, Network &From)
 {
     // Save passes
-    Stream << From.passes << "\n\n";
+    Stream << From.passes << " ";
 
     // Save sizes
-    Stream << From.sizes.getSize() << '\n';
+    Stream << From.sizes.getSize() << ' ';
     for (int i = 0; i < From.sizes.getSize(); i++)
     {
-        Stream << From.sizes[i] << '\t';
+        Stream << From.sizes[i] << ' ';
     }
-    Stream << "\n\n";
 
     // Save nodes
     for (int layer = 1; layer < From.sizes.getSize(); layer++)
     {
         for (int node = 0; node < From.sizes[layer]; node++)
         {
-            // Activation and bias
-            Stream << From.activations[layer][node] << '\t' << From.weights[layer - 1][node][-1] << '\n';
-            // Stream << From.nodes[layer][node].act << '\t' << From.nodes[layer][node].bias << '\n';
-
             // Weights
             for (int weight = 0; weight < From.sizes[layer - 1]; weight++)
             {
-                Stream << From.weights[layer - 1][node][weight] << '\t';
-                // Stream << From.nodes[layer][node].weights[weight] << '\t';
+                Stream << From.weights[layer - 1][node][weight] << ' ';
             }
-            Stream << '\n';
+
+            // Bias
+            Stream << From.weights[layer - 1][node][-1] << ' ';
         }
     }
-    Stream << '\n';
 
     // Save training data
-    Stream << From.trainingData.size() << '\n';
+    Stream << From.trainingData.size() << ' ';
     for (int i = 0; i < From.trainingData.size(); i++)
     {
-        Stream << From.trainingData[i].input.size() << '\n';
+        Stream << From.trainingData[i].input.size() << ' ';
         for (auto inp : From.trainingData[i].input)
         {
-            Stream << inp << '\t';
+            Stream << inp << ' ';
         }
-        Stream << '\n';
 
-        Stream << From.trainingData[i].output.size() << '\n';
+        Stream << From.trainingData[i].output.size() << ' ';
         for (auto exp : From.trainingData[i].output)
         {
-            Stream << exp << '\t';
+            Stream << exp << ' ';
         }
-        Stream << '\n';
     }
-    Stream << '\n';
 
     // Save error
-    Stream << From.getError() << '\t';
+    Stream << From.getError() << ' ';
 
     return;
 }
@@ -104,16 +96,14 @@ Network loadNetwork(istream &Stream)
     {
         for (int node = 0; node < out.sizes[layer]; node++)
         {
-            // Activation and bias
-            Stream >> out.activations[layer][node] >> out.weights[layer - 1][node][-1];
-            // Stream >> out.nodes[layer][node].act >> out.nodes[layer][node].bias;
-
             // Weights
             for (int weight = 0; weight < out.sizes[layer - 1]; weight++)
             {
                 Stream >> out.weights[layer - 1][node][weight];
-                // Stream >> out.nodes[layer][node].weights[weight];
             }
+
+            // Bias
+            Stream >> out.weights[layer - 1][node][-1];
         }
     }
 

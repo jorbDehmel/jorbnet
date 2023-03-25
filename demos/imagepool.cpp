@@ -5,7 +5,9 @@ int main()
 {
     srand(time(NULL));
 
-    dataset imgrgb = loadBMP("test.bmp", 8, 8, {1}, BW_char);
+    dataset imgrgb = loadBMP("test.bmp", 128, 128, {1}, BW_char);
+
+    saveBMP("trainon.bmp", 128, 128, imgrgb.input, BW_char);
 
     dataset blank;
     blank.output = {0};

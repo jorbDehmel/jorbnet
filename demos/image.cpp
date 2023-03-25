@@ -22,7 +22,7 @@ int main(const int argc, const char *argv[])
 
     if (choice == 'n')
     {
-        dataset imgrgb = loadBMP("test.bmp", 8, 8, {1}, BW_char);
+        dataset imgrgb = loadBMP("test.bmp", 128, 128, {1}, BW_char);
 
         dataset blank;
         blank.output = {0};
@@ -47,9 +47,9 @@ int main(const int argc, const char *argv[])
         }
 
         auto start = chrono_now();
-        n.train(10);
+        n.train(50);
         auto end = chrono_now();
-        cout << "Trained. Seconds: " << chrono_ns(end - start) << '\n';
+        cout << "Trained. Nanoseconds: " << chrono_ns(end - start) << '\n';
 
         cout << "Error: " << n.getError() << '\n';
 
@@ -69,7 +69,7 @@ int main(const int argc, const char *argv[])
         cout << "Passes before: " << n.passes << '\n';
 
         auto start = chrono_now();
-        n.train(10);
+        n.train(50);
         auto end = chrono_now();
 
         cout << "Passes after: " << n.passes << '\n';

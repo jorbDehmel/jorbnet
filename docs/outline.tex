@@ -350,7 +350,10 @@ model runs $\frac{2000000000}{942336.4} \equiv 2122.384$ times faster. This, nee
 to say, is an incredible improvement and wastes much less computation.
 
 In fact, a multithreaded pool of 10 of these networks can train for 20 passes in the
-same time it took our original method to train one network once.
+same time it took our original method to train one network once. Much more significantly,
+our Order of complexity is now much better (through observation). This allows us to
+train vastly larger models. In the same time it used to take us to train a $[64, 20, 1]$
+network once, we can now train a $[16384, 20, 1]$ model (a 128x128-pixel image) 10 times.
 
 \section{Sources}
 
