@@ -409,6 +409,7 @@ void Network::backprop(const vector<double> &Expected)
         C += pow(Expected[i] - activations[-1][i], 2);
         // cout << "Exp: " << Expected[i] << " act: " << activations[-1][i] << '\n';
     }
+    C /= sizes[numLayers - 1];
     // cout << "Error: " << C << '\n';
 
     // Set up gradient aggregate as gradient of errors wrt final acts
@@ -418,7 +419,7 @@ void Network::backprop(const vector<double> &Expected)
     SafeArray<double> gradientAggregate(Expected.size());
     for (int i = 0; i < gradientAggregate.getSize(); i++)
     {
-        gradientAggregate[i] = -2 * (Expected[i] - activations[-1][i]) + C - pow(Expected[i] - activations[-1][i], 2);
+        gradientAggregate[i] = -2 / activations[-1].getSize() * (Expected[i] - activations[-1][i]) + C - pow(Expected[i] - activations[-1][i], 2) / activations[-1].getSize();
         gradientAggregate[i] *= actder(activations[-1][i]);
     }
 
@@ -593,6 +594,7 @@ double Network::getError()
             sum += pow(set.output[i] - obs[i], 2);
         }
     }
+    sum /= trainingData[0].output.size();
 
     return sum;
 }

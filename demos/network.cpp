@@ -7,7 +7,7 @@ GPLv3 held by author
 */
 
 #include <iostream>
-#include "../src/jorbNet.hpp"
+#include "jorbnet/jorbNet.hpp"
 using namespace std;
 
 int main()
@@ -48,6 +48,15 @@ int main()
     cout << "Ellapsed ns: " << ellapsed << '\n'
          << "Final error: " << lastError << " (" << (int)(lastError + 0.5) << ")\n"
          << "Network error-NS evaluation: " << errorNs << '\n';
+
+    if (lastError > 0.05)
+    {
+        cout << "Failure.\n";
+    }
+    else
+    {
+        cout << "Success.\n";
+    }
 
     return 0;
 }
