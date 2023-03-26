@@ -389,14 +389,14 @@ void Network::backprop(const vector<double> &Expected)
 
     // For expected e and observed a (for activation), we compute
     // cumulative error C as:
-    // C := (e_0 - a_0)^2 + (e_1 - a_1)^2 + (e_2 - a_2)^2
+    // C * n := (e_0 - a_0)^2 + (e_1 - a_1)^2 + (e_2 - a_2)^2
     // Ergo the error partial derivative with respect to each act is:
     // wrt a_0:
-    //      -2(e_0 - a_0) + (C - (e_0 - a_0)^2)
+    //      -2 / n (e_0 - a_0) + (C - (e_0 - a_0)^2 / n)
     // wrt a_1:
-    //      -2(e_1 - a_1) + (C - (e_1 - a_1)^2)
+    //      -2 / n (e_1 - a_1) + (C - (e_1 - a_1)^2 / n)
     // generally:
-    //      -2(e_i - a_i) + (C - (e_i - a_i)^2)
+    //      -2 / n (e_i - a_i) + (C - (e_i - a_i)^2 / n)
 
     // Amount to modify the weights by is
     // = dot(gradientAggregate, activationsOfLayerBelow)

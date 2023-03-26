@@ -7,6 +7,8 @@
 \author{Jordan E Dehmel}
 \date{}
 
+\newcommand\mat[1]{\mathbb{#1}}
+
 \begin{document}
 \maketitle
 
@@ -306,7 +308,7 @@ all elements of the input.
 Thus, we can express the activation of a layer $l$ as the following.
 
 \[
-    \vec{a_l} = f(W_l \dot \vec{a_{l - 1}})
+    \vec{a_l} = f(W_l \cdot \vec{a_{l - 1}})
 \]
 
 This allows the output of the network $\vec{a_L}$ to be written as the repeated
@@ -314,9 +316,9 @@ application of this process as follows.
 
 \[
     \vec{a_L} = f \left( 
-        W_L \dot f \left(
-            W_{L - 1} \dot f \left( 
-                W_{L - 2} \dot \cdots
+        W_L \cdot f \left(
+            W_{L - 1} \cdot f \left( 
+                W_{L - 2} \cdot \cdots
                     f \left( W_0 \vec{I}
                 \right) \cdots 
             \right)
@@ -334,6 +336,72 @@ before as the following.
 
 We seek to find an efficient computational way to find the gradient of $C$ with
 respect to all the weights and biases of the network.
+
+Assuming $\vec{a}_1$ is somehow dependant on a layer weight $\mat{W}^l$, the following two
+derivative formulas hold.
+
+If $\mat{W}^l$ is not the current layer's weights, the following holds.
+
+\[
+    \begin{aligned}
+        & \vec{a}_l = f(\mat{W}^l \cdot \vec{a}_{l - 1}) \\
+        & \frac{ \partial \vec{a}_l }{ \partial \mat{W}^l } =
+            f'(\mat{W}^l \cdot \vec{a}_{l - 1}) \circ \mat{W}^l
+            \cdot \frac{ \partial \vec{a}_{l - 1} }{ \partial \mat{W}^l } \\
+    \end{aligned}
+\]
+
+Where \circ is the element-wise Hadamard product of vectors. Otherwise, if $\mat{W}^l$
+is the current layer's weights, the following holds.
+
+\[
+    \begin{aligned}
+        & \vec{a}_l = f(\mat{W}^l \cdot \vec{a}_{l - 1}) \\
+        & \frac{ \partial \vec{a}_l }{ \partial \mat{W}^l } =
+            f'(\mat{W}^l \cdot \vec{a}_{l - 1}) \cdot \vec{a}_{l - 1} \\
+    \end{aligned}
+\]
+
+The general form, including the error function $C$, is as follows.
+
+\[
+    \begin{aligned}
+        & \frac{ \partial C }{ \partial \mat{W}^l } = \frac{ \Delta C }{ \Delta a_L }
+            \cdot \frac{ \partial \vec{a}_L }{ \partial \mat{W}^l }
+            \cdot \frac{ \partial \vec{a}_{L - 1} }{ \partial \mat{W}^l }
+            \cdots
+            \cdot \frac{ \partial \vec{a}_l }{ \partial \mat{W}^l } \\
+    \end{aligned}
+\]
+
+Inserting our equations from above, we
+find the following (evaluated left to right).
+
+\[
+    \begin{aligned}
+        & \frac{ \partial C }{ \partial \mat{W}^l } = \frac{ \Delta C }{ \Delta a_L }
+            \cdot
+                f'(\mat{W}^L \cdot \vec{a}_{L - 1}) \circ \mat{W}^L
+            \cdot
+                f'(\mat{W}^{L - 1} \cdot \vec{a}_{L - 2}) \circ \mat{W}^{L - 1}
+            \cdots
+            \cdot
+                f'(\mat{W}^l \cdot \vec{a}_{l - 1}) \cdot \vec{a}_{l - 1} \\
+    \end{aligned}
+\]
+
+This can be interpretted as the errors attributable to each of these weights (we will
+address biases shortly).
+
+One may notice that the full form of the partial derivative will take a
+predictable form due to the chain rule and the nature of our composite function.
+Thus, all the layers will need similar information which can all be computed
+at one time to reduce computation. Using this repetetive nature, we will assign
+the following interim value, what I like to call the Gradient Aggregate.
+
+\[
+    \delta := hi
+\]
 
 \section{Analysis}
 
@@ -372,11 +440,13 @@ following must hold:
 For example, consider the Sigmoid function.
 
 \[
-    f(x) = \frac{1}{1 + e^{-x}} \\
-    f'(x) = f(x) (1 - f(x)) \\
-    f'(f(x)) = f(x) (1 - f(x)) \\
-    f'(f) = f (1 - f) \\
-    f' = g(f) | g(x) = x (1 - x) \\
+    \begin{aligned}
+        f(x) &= \frac{1}{1 + e^{-x}} \\
+        f'(x) &= f(x) (1 - f(x)) \\
+        f'(f(x)) &= f(x) (1 - f(x)) \\
+        f'(f) &= f (1 - f) \\
+        f' &= g(f) | g(x) = x (1 - x) \\
+    \end{aligned}
 \]
 
 Thus,
@@ -395,12 +465,14 @@ double sigder(const double &Act)
 Or consider ReLU (in pseudo-C++ instead of piecewise notation).
 
 \[
-    f(x) = (x > 0) ? x : 0 \\
-    f'(x) = (x > 0) ? 1 : 0 \\
-    f'(f(x)) = (f(x) != 0) ? 1 : 0 \\
-    f'(f) = (f != 0) ? 1 : 0 \\
-    f' = (f != 0) ? 1 : 0 \\
-    f' = g(f) | g(x) = (x != 0) ? 1 : 0 \\
+    \begin{aligned}
+        f(x) &= (x > 0) ? x : 0 \\
+        f'(x) &= (x > 0) ? 1 : 0 \\
+        f'(f(x)) &= (f(x) != 0) ? 1 : 0 \\
+        f'(f) &= (f != 0) ? 1 : 0 \\
+        f' &= (f != 0) ? 1 : 0 \\
+        f' &= g(f) | g(x) = (x != 0) ? 1 : 0 \\
+    \end{aligned}
 \]
 
 Thus,
@@ -419,11 +491,13 @@ double ReLUder(const double &Act)
 Or consider the unit function.
 
 \[
-    f(x) = x \\
-    f'(x) = 1 \\
-    f'(f(x)) = 1 \\
-    f'(f) =1 \\
-    f' = g(f) | g(x) = 1 \\
+    \begin{aligned}
+        f(x) &= x \\
+        f'(x) &= 1 \\
+        f'(f(x)) &= 1 \\
+        f'(f) &= 1 \\
+        f' &= g(f) | g(x) = 1 \\
+    \end{aligned}
 \]
 
 Thus,
@@ -442,11 +516,13 @@ double unitder(const double &Act)
 For fun, consider $sin(x)$.
 
 \[
-    f(x) = sin(x) \\
-    f'(x) = cos(x) \\
-    f'(f(x)) = cos(arcsin(f(x))) \\
-    f'(f) = cos(arcsin(f)) \\
-    f' = g(f) | g(x) = cos(arcsin(x)) \\
+    \begin{aligned}
+        f(x) = sin(x) \\
+        f'(x) = cos(x) \\
+        f'(f(x)) = cos(arcsin(f(x))) \\
+        f'(f) = cos(arcsin(f)) \\
+        f' = g(f) | g(x) = cos(arcsin(x)) \\
+    \end{aligned}
 \]
 
 Thus,
