@@ -53,9 +53,6 @@ void saveNetwork(ostream &Stream, Network &From)
         }
     }
 
-    // Save error
-    Stream << From.getError() << ' ';
-
     return;
 }
 

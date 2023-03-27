@@ -22,6 +22,7 @@ int main(const int argc, const char *argv[])
 
     if (choice == 'n')
     {
+        cout << "Constructing dataset...\n";
         dataset imgrgb = loadBMP("test.bmp", 128, 128, {1}, BW_char);
 
         dataset blank;
@@ -46,6 +47,7 @@ int main(const int argc, const char *argv[])
             n.trainingData.push_back(a);
         }
 
+        cout << "Training...\n";
         auto start = chrono_now();
         n.train(50);
         auto end = chrono_now();
@@ -53,11 +55,16 @@ int main(const int argc, const char *argv[])
 
         cout << "Error: " << n.getError() << '\n';
 
+        cout << "Saving...\n";
         saveNetwork("bestImage.nn", n);
+        cout << "Saved.\n";
     }
     else
     {
+        cout << "Loading...\n";
         Network n = loadNetwork("bestImage.nn");
+        cout << "Loaded.\n";
+
         double prevError = n.getError();
 
         // Error hop
