@@ -396,12 +396,67 @@ address biases shortly).
 One may notice that the full form of the partial derivative will take a
 predictable form due to the chain rule and the nature of our composite function.
 Thus, all the layers will need similar information which can all be computed
-at one time to reduce computation. Using this repetetive nature, we will assign
-the following interim value, what I like to call the Gradient Aggregate.
+at one time to reduce computation.
+
+To convert our vector of partial derivatives into a gradient for use in our stochastic
+gradient descent, we will take the transpose of all the weights and reverse the order
+of evaluation.
 
 \[
-    \delta := hi
+    \begin{aligned}
+        & = f'( (\mat{W}^l)^T \cdot \vec{a}_{l - 1}) \cdot \vec{a}_{l - 1} \\
+            \cdot
+            \cdots
+                f'( (\mat{W}^{L - 1})^T \cdot \vec{a}_{L - 2} ) \circ (\mat{W}^{L - 1})^T
+            \cdot
+                f'( (\mat{W}^L)^T \cdot \vec{a}_{L - 1} ) \circ (\mat{W}^L)^T
+            \cdot
+                \frac{ \Delta C }{ \Delta a_L }
+    \end{aligned}
 \]
+
+Using this repetetive nature, we will assign the following interim value $\delta$,
+which I call the Gradient Aggregate.
+
+\[
+    \delta^L := f'( (\mat{W}^L)^T \cdot \vec{a}_{L - 1} ) \circ (\mat{W}^L)^T \cdot \frac{ \Delta C }{ \Delta a_L } \\
+    \delta^l := f'( (\mat{W}^{l})^T \cdot \vec{a}_{l - 1} ) \circ (\mat{W}^{l})^T \cdot \delta^{l + 1} \\
+\]
+
+Since we will be finding the value $g$ such that $f' = g(f)$ holds (which yields minor
+computational improvements), we can simplify the above to the following.
+
+\[
+    \delta^L := g(f_L) \circ (\mat{W}^L)^T \cdot \frac{ \Delta C }{ \Delta a_L } \\
+    \delta^l := g(f_l) \circ (\mat{W}^{l})^T \cdot \delta^{l + 1} \\
+\]
+
+To get the error attributable to the weights at layer $l$, we then apply the final part
+of our earlier equation.
+
+\[
+    & = g(f_l) \cdot \vec{a}_{l - 1} \\
+\]
+
+We then start at layer $L$ (the output layer), and compute the error attributable to
+each layer as we work our way down to layer $1$ (the last layer with weights). We pass
+our computed gradient aggregate from each layer $l$ to the below layer $l - 1$, and store
+the attributable error for each layer as we pass backwards through the network.
+
+After the attributable errors for each weight in each layer have been calculated (1 pass
+of backpropogation), we can then apply our same stochastic gradient descent algorithm to
+each weight.
+
+Note: Since the activation leading into a bias is always 1, we can say that the error
+attributable to a bias is equal to the activation derivative of the node it is associated
+with.
+
+\[
+    & = (g(f_l) \cdot \vec{a}_{l - 1})_{b} \\
+    & = (g(f_l)_{b} \cdot 1) = g(f_1)_b \\
+\]
+
+With this, we can fully implement our linear-algebra based backpropogation algorithm.
 
 \section{Analysis}
 
