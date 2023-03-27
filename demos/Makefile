@@ -8,7 +8,7 @@ SUFFIX = `jorbnet-flags`
 
 #####################################################
 
-all: main.out npool.out image.out imagepool.out strip.out
+all: main.out npool.out image.out imagepool.out strip.out networkData.out
 
 #####################################################
 
@@ -26,6 +26,9 @@ imagepool.out:	imagepool.cpp /usr/include/jorbnet
 
 strip.out:	strip.cpp /usr/include/jorbnet
 	$(STEM) -o strip.out strip.cpp `jorbnet-flags`
+
+networkData.out:	networkData.cpp /usr/include/jorbnet
+	$(STEM) -o networkData.out networkData.cpp `jorbnet-flags`
 
 #####################################################
 

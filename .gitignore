@@ -19,3 +19,4 @@ old/
 *.objs
 *.a
 *.bmp
+*.csv
