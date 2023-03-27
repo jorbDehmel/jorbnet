@@ -8,6 +8,7 @@
 \date{}
 
 \newcommand\mat[1]{\mathbb{#1}}
+\newcommand\where{\, \bigg\rvert \,}
 
 \begin{document}
 \maketitle
@@ -351,7 +352,7 @@ If $\mat{W}^l$ is not the current layer's weights, the following holds.
     \end{aligned}
 \]
 
-Where \circ is the element-wise Hadamard product of vectors. Otherwise, if $\mat{W}^l$
+Where $\circ$ is the element-wise Hadamard product of vectors. Otherwise, if $\mat{W}^l$
 is the current layer's weights, the following holds.
 
 \[
@@ -404,7 +405,7 @@ of evaluation.
 
 \[
     \begin{aligned}
-        & = f'( (\mat{W}^l)^T \cdot \vec{a}_{l - 1}) \cdot \vec{a}_{l - 1} \\
+        & = f'( (\mat{W}^l)^T \cdot \vec{a}_{l - 1}) \cdot \vec{a}_{l - 1}
             \cdot
             \cdots
                 f'( (\mat{W}^{L - 1})^T \cdot \vec{a}_{L - 2} ) \circ (\mat{W}^{L - 1})^T
@@ -419,23 +420,27 @@ Using this repetetive nature, we will assign the following interim value $\delta
 which I call the Gradient Aggregate.
 
 \[
-    \delta^L := f'( (\mat{W}^L)^T \cdot \vec{a}_{L - 1} ) \circ (\mat{W}^L)^T \cdot \frac{ \Delta C }{ \Delta a_L } \\
-    \delta^l := f'( (\mat{W}^{l})^T \cdot \vec{a}_{l - 1} ) \circ (\mat{W}^{l})^T \cdot \delta^{l + 1} \\
+    \begin{aligned}
+        \delta^L := f'( (\mat{W}^L)^T \cdot \vec{a}_{L - 1} ) \circ (\mat{W}^L)^T \cdot \frac{ \Delta C }{ \Delta a_L } \\
+        \delta^l := f'( (\mat{W}^{l})^T \cdot \vec{a}_{l - 1} ) \circ (\mat{W}^{l})^T \cdot \delta^{l + 1} \\
+    \end{aligned}
 \]
 
 Since we will be finding the value $g$ such that $f' = g(f)$ holds (which yields minor
 computational improvements), we can simplify the above to the following.
 
 \[
-    \delta^L := g(f_L) \circ (\mat{W}^L)^T \cdot \frac{ \Delta C }{ \Delta a_L } \\
-    \delta^l := g(f_l) \circ (\mat{W}^{l})^T \cdot \delta^{l + 1} \\
+    \begin{aligned}
+        \delta^L := g(f_L) \circ (\mat{W}^L)^T \cdot \frac{ \Delta C }{ \Delta a_L } \\
+        \delta^l := g(f_l) \circ (\mat{W}^{l})^T \cdot \delta^{l + 1} \\
+    \end{aligned}
 \]
 
 To get the error attributable to the weights at layer $l$, we then apply the final part
 of our earlier equation.
 
 \[
-    & = g(f_l) \cdot \vec{a}_{l - 1} \\
+    E_l = g(f_l) \cdot \vec{a}_{l - 1} \\
 \]
 
 We then start at layer $L$ (the output layer), and compute the error attributable to
@@ -452,8 +457,10 @@ attributable to a bias is equal to the activation derivative of the node it is a
 with.
 
 \[
-    & = (g(f_l) \cdot \vec{a}_{l - 1})_{b} \\
-    & = (g(f_l)_{b} \cdot 1) = g(f_1)_b \\
+    \begin{aligned}
+        (E_l)_b = (g(f_l) \cdot \vec{a}_{l - 1})_{b} \\
+        (E_l)_b = (g(f_l)_{b} \cdot 1) = g(f_1)_b \\
+    \end{aligned}
 \]
 
 With this, we can fully implement our linear-algebra based backpropogation algorithm.
@@ -481,13 +488,16 @@ network once, we can now train a $[16384, 20, 1]$ model (a 128x128-pixel image) 
 \section{Creating an Activation Function}
 
 An activation function can be any function mapping
-a node's weighted sum of inputs to its activation, so
-long as an accompianing derivative can be meaningfully
-defined and expressed in terms of its value (such that,
-given its activation, the derivative can be found).
+a node's weighted sum of inputs to its activation. However, the chain rule used
+in our above calculations means that the previous weights and layer below's activations
+must all be kept. For the default activation function (the Sigmoid), the derivative can
+be defined more efficiently in terms of the previous activation. Thus, we will be
+necessitating this quality in our activation functions.
 
-As a first-order ordinary differential equation, the
-following must hold:
+Thus, an activation function must be defined and expressed in terms of its value (such
+that, given its activation, the derivative can be found).
+
+As a first-order ordinary differential equation, the following must hold:
 \[
     f' = g(f)
 \]
@@ -497,10 +507,15 @@ For example, consider the Sigmoid function.
 \[
     \begin{aligned}
         f(x) &= \frac{1}{1 + e^{-x}} \\
+        f'(x) &= \frac{-1}{(1 + e^{-x})^2} \cdot -e^{-x} \\
+        f'(x) &= \frac{1}{1 + e^{-x}} \frac{1}{1 + e^{-x}} \cdot e^{-x} \\
+        f'(x) &= f(x) \left( \frac{e^{-x}}{1 + e^{-x}} \right) \\
+        f'(x) &= f(x) \left( \frac{1 + e^{-x} - 1}{1 + e^{-x}} \right) \\
+        f'(x) &= f(x) \left( \frac{1 + e^{-x}}{1 + e^{-x}} - \frac{1}{1 + e^{-x}} \right) \\
         f'(x) &= f(x) (1 - f(x)) \\
         f'(f(x)) &= f(x) (1 - f(x)) \\
         f'(f) &= f (1 - f) \\
-        f' &= g(f) | g(x) = x (1 - x) \\
+        f' &= g(f) \where g(x) = x (1 - x) \\
     \end{aligned}
 \]
 
@@ -526,7 +541,7 @@ Or consider ReLU (in pseudo-C++ instead of piecewise notation).
         f'(f(x)) &= (f(x) != 0) ? 1 : 0 \\
         f'(f) &= (f != 0) ? 1 : 0 \\
         f' &= (f != 0) ? 1 : 0 \\
-        f' &= g(f) | g(x) = (x != 0) ? 1 : 0 \\
+        f' &= g(f) \where g(x) = (x != 0) ? 1 : 0 \\
     \end{aligned}
 \]
 
@@ -551,7 +566,7 @@ Or consider the unit function.
         f'(x) &= 1 \\
         f'(f(x)) &= 1 \\
         f'(f) &= 1 \\
-        f' &= g(f) | g(x) = 1 \\
+        f' &= g(f) \where g(x) = 1 \\
     \end{aligned}
 \]
 
@@ -576,7 +591,7 @@ For fun, consider $sin(x)$.
         f'(x) = cos(x) \\
         f'(f(x)) = cos(arcsin(f(x))) \\
         f'(f) = cos(arcsin(f)) \\
-        f' = g(f) | g(x) = cos(arcsin(x)) \\
+        f' = g(f) \where g(x) = cos(arcsin(x)) \\
     \end{aligned}
 \]
 
