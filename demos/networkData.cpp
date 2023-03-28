@@ -37,14 +37,25 @@ int main(const int argc, const char *argv[])
     auto n = loadNetwork(fileName);
     cout << "Loaded.\n";
 
+    cout << "Network creation time/date: " << ctime(&n.creationTime) << '\n'
+         << "Description:\n\t" << n.description << '\n'
+         << "Data info ID: " << n.dataInfo << '\n';
+
     if (n.trainingData.size() == 0)
     {
         cout << "Network has no training data: Process aborted.\n";
         return 1;
     }
 
+    cout << "Image modes:\n"
+         << " 0) BW_double\n"
+         << " 1) BW_char\n"
+         << " 2) RGBA\n"
+         << " 3) RGB\n"
+         << "(Usually matches data info ID)\n";
+
     int modeInt;
-    cout << "Mode index (see enum): ";
+    cout << "Mode index: ";
     cin >> modeInt;
 
     Mode mode = (Mode)modeInt;

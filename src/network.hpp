@@ -90,6 +90,11 @@ public:
     friend Network loadNetwork(istream &Stream);
     friend class NPool;
 
+    // Metadata
+    string description;
+    time_t creationTime;
+    long dataInfo;
+
 protected:
     // Internal data structure containing network data
     int numLayers = 0;

@@ -172,6 +172,11 @@ void dotEquals(SafeArray<double> &What, const SafeArray<SafeArray<double>> &By)
 
 Network::Network(const vector<int> &Sizes)
 {
+    // Metadata
+    creationTime = time(NULL);
+    description = "N/A";
+    dataInfo = 0;
+
     // Construct sizes list
     numLayers = Sizes.size();
     sizes = SafeArray<int>(numLayers);
@@ -218,6 +223,11 @@ Network::Network(const vector<int> &Sizes)
 
 Network::Network(const Network &Other)
 {
+    // Steal metadata
+    description = Other.description;
+    creationTime = Other.creationTime;
+    dataInfo = Other.dataInfo;
+
     // Construct sizes list
     numLayers = Other.sizes.getSize();
     sizes = SafeArray<int>(numLayers);

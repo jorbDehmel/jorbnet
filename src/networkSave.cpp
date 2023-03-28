@@ -53,6 +53,10 @@ void saveNetwork(ostream &Stream, Network &From)
         }
     }
 
+    Stream << From.creationTime << '\n'
+           << From.dataInfo << '\n'
+           << From.description << '\n';
+
     return;
 }
 
@@ -131,6 +135,16 @@ Network loadNetwork(istream &Stream)
     }
 
     out.passes = passes;
+
+    Stream >> out.creationTime >> out.dataInfo;
+
+    string line;
+    out.description = "";
+    while (!Stream.eof())
+    {
+        getline(Stream, line);
+        out.description += line;
+    }
 
     return out;
 }
