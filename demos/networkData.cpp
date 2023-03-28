@@ -35,11 +35,11 @@ int main(const int argc, const char *argv[])
 
     cout << "Loading...\n";
     auto n = loadNetwork(fileName);
-    cout << "Loaded.\n";
+    cout << "Loaded.\n\n";
 
-    cout << "Network creation time/date: " << ctime(&n.creationTime) << '\n'
-         << "Description:\n\t" << n.description << '\n'
-         << "Data info ID: " << n.dataInfo << '\n';
+    cout << "Network creation time/date: " << ctime(&n.creationTime)
+         << "Description: \"" << n.description << "\"\n"
+         << "Data info ID: " << n.dataInfo << "\n\n";
 
     if (n.trainingData.size() == 0)
     {

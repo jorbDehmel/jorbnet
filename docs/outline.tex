@@ -5,7 +5,6 @@
 
 \title{Machine Learning Outline}
 \author{Jordan E Dehmel}
-\date{}
 
 \newcommand\mat[1]{\mathbb{#1}}
 \newcommand\where{\, \bigg\rvert \,}
@@ -48,8 +47,8 @@ $$
 Method 2 (easy derivative):
 $$
 \begin{aligned}
-    y &= \sum{(e_i - o_i)^2} \\
-    \frac{\partial y}{\partial w_k} &= -2 \sum{(e_i - o_i) \frac{\partial o_i}{\partial w_k}}
+    y &= \frac{1}{n} \sum{(e_i - o_i)^2} \\
+    \frac{\partial y}{\partial w_k} &= - \frac{2}{n} \sum{(e_i - o_i) \frac{\partial o_i}{\partial w_k}}
 \end{aligned}
 $$
 
@@ -401,11 +400,11 @@ at one time to reduce computation.
 
 To convert our vector of partial derivatives into a gradient for use in our stochastic
 gradient descent, we will take the transpose of all the weights and reverse the order
-of evaluation.
+of evaluation. This yields the gradient vector $\vec{E}$
 
 \[
     \begin{aligned}
-        & = f'( (\mat{W}^l)^T \cdot \vec{a}_{l - 1}) \cdot \vec{a}_{l - 1}
+        & \mat{E} = f'( (\mat{W}^l)^T \cdot \vec{a}_{l - 1}) \cdot \vec{a}_{l - 1}
             \cdot
             \cdots
                 f'( (\mat{W}^{L - 1})^T \cdot \vec{a}_{L - 2} ) \circ (\mat{W}^{L - 1})^T
@@ -440,7 +439,7 @@ To get the error attributable to the weights at layer $l$, we then apply the fin
 of our earlier equation.
 
 \[
-    E_l = g(f_l) \cdot \vec{a}_{l - 1} \\
+    \mat{E}_l = g(f_l) \cdot \vec{a}_{l - 1} \\
 \]
 
 We then start at layer $L$ (the output layer), and compute the error attributable to
@@ -458,8 +457,8 @@ with.
 
 \[
     \begin{aligned}
-        (E_l)_b = (g(f_l) \cdot \vec{a}_{l - 1})_{b} \\
-        (E_l)_b = (g(f_l)_{b} \cdot 1) = g(f_1)_b \\
+        (\mat{E}_l)_b = (g(f_l) \cdot \vec{a}_{l - 1})_{b} \\
+        (\mat{E}_l)_b = (g(f_l)_{b} \cdot 1) = g(f_1)_b \\
     \end{aligned}
 \]
 
@@ -506,16 +505,15 @@ For example, consider the Sigmoid function.
 
 \[
     \begin{aligned}
-        f(x) &= \frac{1}{1 + e^{-x}} \\
-        f'(x) &= \frac{-1}{(1 + e^{-x})^2} \cdot -e^{-x} \\
-        f'(x) &= \frac{1}{1 + e^{-x}} \frac{1}{1 + e^{-x}} \cdot e^{-x} \\
-        f'(x) &= f(x) \left( \frac{e^{-x}}{1 + e^{-x}} \right) \\
-        f'(x) &= f(x) \left( \frac{1 + e^{-x} - 1}{1 + e^{-x}} \right) \\
-        f'(x) &= f(x) \left( \frac{1 + e^{-x}}{1 + e^{-x}} - \frac{1}{1 + e^{-x}} \right) \\
-        f'(x) &= f(x) (1 - f(x)) \\
-        f'(f(x)) &= f(x) (1 - f(x)) \\
-        f'(f) &= f (1 - f) \\
-        f' &= g(f) \where g(x) = x (1 - x) \\
+        & f(x) = \frac{1}{1 + e^{-x}} \\
+        & f'(x) = \frac{-1}{(1 + e^{-x})^2} \cdot -e^{-x} \\
+        & f'(x) = \frac{1}{1 + e^{-x}} \frac{1}{1 + e^{-x}} \cdot e^{-x} \\
+        & f'(x) = f(x) \left( \frac{e^{-x}}{1 + e^{-x}} \right) \\
+        & f'(x) = f(x) \left( \frac{1 + e^{-x} - 1}{1 + e^{-x}} \right) \\
+        & f'(x) = f(x) \left( \frac{1 + e^{-x}}{1 + e^{-x}} - \frac{1}{1 + e^{-x}} \right) \\
+        & f'(x) = f(x) (1 - f(x)) \\
+        & f'(f) = f (1 - f) \\
+        & f' = g(f) \where g(x) = x (1 - x) \\
     \end{aligned}
 \]
 
@@ -536,12 +534,11 @@ Or consider ReLU (in pseudo-C++ instead of piecewise notation).
 
 \[
     \begin{aligned}
-        f(x) &= (x > 0) ? x : 0 \\
-        f'(x) &= (x > 0) ? 1 : 0 \\
-        f'(f(x)) &= (f(x) != 0) ? 1 : 0 \\
-        f'(f) &= (f != 0) ? 1 : 0 \\
-        f' &= (f != 0) ? 1 : 0 \\
-        f' &= g(f) \where g(x) = (x != 0) ? 1 : 0 \\
+        & f(x) = (x > 0) ? x : 0 \\
+        & f'(x) = (x > 0) ? 1 : 0 \\
+        & f'(f) = (f != 0) ? 1 : 0 \\
+        & f' = (f != 0) ? 1 : 0 \\
+        & f' = g(f) \where g(x) = (x != 0) ? 1 : 0 \\
     \end{aligned}
 \]
 
@@ -562,11 +559,11 @@ Or consider the unit function.
 
 \[
     \begin{aligned}
-        f(x) &= x \\
-        f'(x) &= 1 \\
-        f'(f(x)) &= 1 \\
-        f'(f) &= 1 \\
-        f' &= g(f) \where g(x) = 1 \\
+        & f(x) = x \\
+        & f'(x) = 1 \\
+        & f'(f(x)) = 1 \\
+        & f'(f) = 1 \\
+        & f' = g(f) \where g(x) = 1 \\
     \end{aligned}
 \]
 
@@ -587,11 +584,11 @@ For fun, consider $sin(x)$.
 
 \[
     \begin{aligned}
-        f(x) = sin(x) \\
-        f'(x) = cos(x) \\
-        f'(f(x)) = cos(arcsin(f(x))) \\
-        f'(f) = cos(arcsin(f)) \\
-        f' = g(f) \where g(x) = cos(arcsin(x)) \\
+        & f(x) = sin(x) \\
+        & f'(x) = cos(x) \\
+        & f'(f(x)) = cos(arcsin(f(x))) \\
+        & f'(f) = cos(arcsin(f)) \\
+        & f' = g(f) \where g(x) = cos(arcsin(x)) \\
     \end{aligned}
 \]
 

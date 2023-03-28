@@ -98,6 +98,7 @@ see the accompianing file `docs/writeup.pdf` (made via
 ## Sources
 
 https://en.wikipedia.org/wiki/Backpropagation
+
 http://neuralnetworksanddeeplearning.com/chap2.html
 
 ## License
