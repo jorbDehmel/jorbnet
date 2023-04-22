@@ -257,6 +257,16 @@ public:
         return;
     }
 
+    T *begin()
+    {
+        return &data[0];
+    }
+
+    T *end()
+    {
+        return &data[sizeNum];
+    }
+
 protected:
     int sizeNum;
     int maxSize;
