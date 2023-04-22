@@ -3,11 +3,11 @@
 \usepackage{geometry}
 \geometry{letterpaper}
 
-\title{Machine Learning Outline}
+\title{Some Ramblings On Machine Learning}
 \author{Jordan E Dehmel}
 
 \newcommand\mat[1]{\mathbb{#1}}
-\newcommand\where{\, \bigg\rvert \,}
+\newcommand\where{\, \bigg \rvert \,}
 
 \begin{document}
 \maketitle
@@ -604,6 +604,69 @@ double sinActDer(const double &Act)
     return cos(asin(X));
 }
 \end{verbatim}
+
+\section{Space-Time Complexity Analysis}
+
+The linear-algebra-based backpropogation algorithm must, due to its
+cascading nature, touch each weight in the network at least once. Thus,
+we can establish a reasonable lower bound for the time complexity to be
+$\Omega (w)$, where $w$ is the number of weights in the network.
+
+\section{Equation-Informed Neural Networks (P.I.N.N.s)}
+
+Suppose we enforce an additional invariant upon the network in the
+form of a specially-designed error function.
+
+For instance, suppose we impose that the output layer $\vec{l}$
+satisfies
+
+\[
+    l_0 + l_1 = -l_2
+\]
+
+It follows that
+
+\[
+    l_0 + l_1 + l_2 = 0
+\]
+
+We assign the error function $C$ such that
+
+\[
+    C := |(l_0 + l_1 + l_2)|
+\]
+
+Thus, the error function will be zero at the desired point,
+and increase as it varies (A single-item 2-norm, if you will).
+Network design does not require the error function, it requires
+only the derivative of it. Thus,
+
+\[
+    C' = (l_0 + l_1 + l_2)' = l_0' + l_1' + l_2'
+\]
+
+We could then impose this as the error function. Generally,
+we shall define an \textbf{Equation-Informed Neural Network (EINN)}
+as one with an error function imposed as such. An \textbf{Ordinary Neural 
+Network (ONN)} is seen as the trivial case of an EINN where the error
+function is the magnitude (2-norm) of the error vector, IE 
+
+\[
+    C := | \sqrt{\sum_i{(e_i - o_i)^2}} | = \sqrt{\sum_i{(e_i - o_i)^2}}
+\]
+
+Or the easy-compute version
+
+\[
+    C := | \frac{\sum_i{(e_i - o_i)^2}}{n} | = \frac{\sum_i{(e_i - o_i)^2}}{n}
+\]
+
+The error function could be a measure of the output's adherence to known
+laws of nature, in which case it would be considered a \textbf{Physics-Informed
+Neural Network (PINN)}.
+
+This sort of system allows us to utilize mathematical derivations about
+the nature of solution sets as additional training data.
 
 \section{Sources}
 

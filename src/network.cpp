@@ -361,11 +361,15 @@ vector<double> Network::prop(const vector<double> &Input)
     }
 
     // Propogate
+    // Time proportional to the number of weights in the network
     for (int layer = 1; layer < numLayers; layer++)
     {
         for (int node = 0; node < sizes[layer]; node++)
         {
+            // O(len(weights[layer - 1][node]))
             activations[layer][node] = bdot(activations[layer - 1], weights[layer - 1][node], sizes[layer - 1]);
+
+            // O(1)
             activations[layer][node] = act(activations[layer][node]);
         }
     }
@@ -381,6 +385,7 @@ vector<double> Network::prop(const vector<double> &Input)
 }
 
 // Requires previous propogation
+// Time proportional to the number of weights in the network
 void Network::backprop(const vector<double> &Expected)
 {
     // see wikipedia on backpropagation

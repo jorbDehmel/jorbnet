@@ -63,8 +63,8 @@ public:
     Network &operator=(const Network &Other);
 
     // Basic propogation and backpropogation functions
-    vector<double> prop(const vector<double> &Input);
-    void backprop(const vector<double> &Expected);
+    vector<double> prop(const vector<double> &Input); // Time proportional to the number of weights in the network
+    void backprop(const vector<double> &Expected);    // Time proportional to the number of weights in the network
 
     // Assumes weights is one item longer, with the final entry being bias
     double bdot(SafeArray<double> Inputs, SafeArray<double> Weights, const int &SizeOfInputs) const;
