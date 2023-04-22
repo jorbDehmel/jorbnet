@@ -40,16 +40,18 @@ void saveNetwork(ostream &Stream, Network &From)
     Stream << From.trainingData.size() << ' ';
     for (int i = 0; i < From.trainingData.size(); i++)
     {
-        Stream << From.trainingData[i].input.size() << ' ';
-        for (auto inp : From.trainingData[i].input)
+        Stream << From.trainingData[i].input.getSize() << ' ';
+
+        for (int j = 0; j < From.trainingData[i].input.getSize(); j++)
         {
-            Stream << inp << ' ';
+            Stream << From.trainingData[i].input[j] << ' ';
         }
 
-        Stream << From.trainingData[i].output.size() << ' ';
-        for (auto exp : From.trainingData[i].output)
+        Stream << From.trainingData[i].output.getSize() << ' ';
+
+        for (int j = 0; j < From.trainingData[i].output.getSize(); j++)
         {
-            Stream << exp << ' ';
+            Stream << From.trainingData[i].output[j] << ' ';
         }
     }
 
@@ -116,19 +118,22 @@ Network loadNetwork(istream &Stream)
 
         int dataSize;
         Stream >> dataSize;
+        toAdd.input = SafeArray<double>(dataSize);
         for (int j = 0; j < dataSize; j++)
         {
             double temp;
             Stream >> temp;
-            toAdd.input.push_back(temp);
+
+            toAdd.input[j] = temp;
         }
 
         Stream >> dataSize;
+        toAdd.output = SafeArray<double>(dataSize);
         for (int j = 0; j < dataSize; j++)
         {
             double temp;
             Stream >> temp;
-            toAdd.output.push_back(temp);
+            toAdd.output[j] = temp;
         }
 
         out.trainingData.push_back(toAdd);

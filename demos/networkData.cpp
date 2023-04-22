@@ -12,14 +12,14 @@ GPLv3 held by author
 #include <fstream>
 using namespace std;
 
-double getError(const vector<double> &E, const vector<double> &O)
+double getError(const SafeArray<double> &E, const SafeArray<double> &O)
 {
     double totalError = 0;
-    for (int i = 0; i < E.size(); i++)
+    for (int i = 0; i < E.getSize(); i++)
     {
         totalError += pow(E[i] - O[i], 2);
     }
-    return totalError / E.size();
+    return totalError / E.getSize();
 }
 
 int main(const int argc, const char *argv[])
@@ -91,12 +91,12 @@ int main(const int argc, const char *argv[])
         cout << "Width (Height will be adjusted accordingly): ";
         cin >> w;
 
-        h = n.trainingData[0].input.size() / w;
+        h = n.trainingData[0].input.getSize() / w;
         cout << "Calculated height: " << h << '\n';
     }
     else
     {
-        w = h = sqrt(n.trainingData[0].input.size());
+        w = h = sqrt(n.trainingData[0].input.getSize());
     }
 
     cout << "Saving images...\n";
@@ -110,7 +110,7 @@ int main(const int argc, const char *argv[])
     }
 
     errors << "Image number, Error, ";
-    for (int i = 0; i < n.trainingData[0].output.size(); i++)
+    for (int i = 0; i < n.trainingData[0].output.getSize(); i++)
     {
         errors << "Act " << i << ", ";
     }
@@ -129,9 +129,9 @@ int main(const int argc, const char *argv[])
         double err = getError(set.output, observed);
 
         errors << i << ", " << err << ", ";
-        for (auto a : observed)
+        for (int j = 0; j < observed.size(); j++)
         {
-            errors << a << ", ";
+            errors << observed[j] << ", ";
         }
         errors << '\n';
 

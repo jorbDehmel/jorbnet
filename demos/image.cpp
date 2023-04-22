@@ -23,13 +23,14 @@ int main(const int argc, const char *argv[])
     if (choice == 'n')
     {
         cout << "Constructing dataset...\n";
-        dataset imgrgb = loadBMP("test.bmp", 128, 128, {1}, BW_char);
+        dataset imgrgb = loadBMP("test.bmp", 128, 128, SafeArray<double>({1}), BW_char);
 
         dataset blank;
         blank.output = {0};
-        for (int i = 0; i < imgrgb.input.size(); i++)
+        blank.input = SafeArray<double>(imgrgb.input.getSize());
+        for (int i = 0; i < imgrgb.input.getSize(); i++)
         {
-            blank.input.push_back(0);
+            blank.input[i] = 0;
         }
 
         const int num = 10;
@@ -37,7 +38,7 @@ int main(const int argc, const char *argv[])
         vector<dataset> fuzzedImage = addNoise(imgrgb, 5, num);
         vector<dataset> fuzzedBlank = addNoise(blank, 5, num);
 
-        Network n({(int)fuzzedImage[0].input.size(), 20, 1});
+        Network n({(int)fuzzedImage[0].input.getSize(), 20, 1});
         for (auto a : fuzzedImage)
         {
             n.trainingData.push_back(a);

@@ -8,6 +8,27 @@ GPLv3 held by author
 
 #include "network.hpp"
 
+// Easy-der
+double __stderr(const SafeArray<double> &Obs, const SafeArray<double> &Exp)
+{
+    double out = 0;
+    for (int i = 0; i < Obs.getSize(); i++)
+    {
+        out += pow(Exp[i] - Obs[i], 2);
+    }
+    return out / Obs.getSize();
+}
+
+SafeArray<double> __stderrder(const SafeArray<double> &Obs, const SafeArray<double> &Exp)
+{
+    SafeArray<double> out(Obs.getSize());
+    for (int i = 0; i < out.getSize(); i++)
+    {
+        out[i] = -2 / out.getSize() * (Exp[i] - Obs[i]);
+    }
+    return out;
+}
+
 string toTime(long long Ns)
 {
     if (Ns < 0)
@@ -274,9 +295,9 @@ Network::Network(const Network &Other)
     }
 
     // Copy training data
-    for (auto d : Other.trainingData)
+    for (int i = 0; i < Other.trainingData.size(); i++)
     {
-        trainingData.push_back(d);
+        trainingData.push_back(Other.trainingData[i]);
     }
 
     passes = Other.passes;
@@ -336,9 +357,9 @@ Network &Network::operator=(const Network &Other)
     }
 
     // Copy training data
-    for (auto d : Other.trainingData)
+    for (int i = 0; i < Other.trainingData.size(); i++)
     {
-        trainingData.push_back(d);
+        trainingData.push_back(Other.trainingData[i]);
     }
 
     passes = Other.passes;
@@ -346,16 +367,16 @@ Network &Network::operator=(const Network &Other)
     return *this;
 }
 
-vector<double> Network::prop(const vector<double> &Input)
+SafeArray<double> Network::prop(const SafeArray<double> &Input)
 {
     // Ensure input vector matches network size
-    if (Input.size() != sizes[0])
+    if (Input.getSize() != sizes[0])
     {
         throw runtime_error("Error: Input size does not match network size");
     }
 
     // Load into inputs
-    for (int i = 0; i < Input.size(); i++)
+    for (int i = 0; i < Input.getSize(); i++)
     {
         activations[0][i] = Input[i];
     }
@@ -375,18 +396,12 @@ vector<double> Network::prop(const vector<double> &Input)
     }
 
     // Return output layer
-    vector<double> out;
-    for (int i = 0; i < sizes[-1]; i++)
-    {
-        out.push_back(activations[-1][i]);
-    }
-
-    return out;
+    return activations[-1];
 }
 
 // Requires previous propogation
 // Time proportional to the number of weights in the network
-void Network::backprop(const vector<double> &Expected)
+void Network::backprop(const SafeArray<double> &Expected)
 {
     // see wikipedia on backpropagation
     // http://neuralnetworksanddeeplearning.com/chap2.html
@@ -416,25 +431,24 @@ void Network::backprop(const vector<double> &Expected)
     // Amount to modify the weights by is
     // = dot(gradientAggregate, activationsOfLayerBelow)
 
-    // Calculate cumulative error
-    // cout << "Getting error...\n";
-    double C = 0;
+    // Not sure what I was smoking when I wrote this, but it doesn't make any sense:
+    /*double C = 0;
     for (int i = 0; i < sizes[numLayers - 1]; i++)
     {
         C += pow(Expected[i] - activations[-1][i], 2);
         // cout << "Exp: " << Expected[i] << " act: " << activations[-1][i] << '\n';
     }
     C /= sizes[numLayers - 1];
-    // cout << "Error: " << C << '\n';
+    // This value is NOT OF ANY USE in calculating the partial derivative of the error function!*/
 
     // Set up gradient aggregate as gradient of errors wrt final acts
     // Then hadamard-ed by vector of sigder of previous final act
 
-    // cout << "Establishing GA...\n";
-    SafeArray<double> gradientAggregate(Expected.size());
+    // SafeArray<double> gradientAggregate(Expected.size());
+    SafeArray<double> gradientAggregate = errder(activations[-1], Expected);
+
     for (int i = 0; i < gradientAggregate.getSize(); i++)
     {
-        gradientAggregate[i] = -2 / activations[-1].getSize() * (Expected[i] - activations[-1][i]) + C - pow(Expected[i] - activations[-1][i], 2) / activations[-1].getSize();
         gradientAggregate[i] *= actder(activations[-1][i]);
     }
 
@@ -444,30 +458,18 @@ void Network::backprop(const vector<double> &Expected)
         // Iterate through weights
         for (int weight = 0; weight < sizes[numLayers - 2]; weight++)
         {
-            // cout << "Adjusting weight " << layer << " " << node << " " << weight << '\n';
-
             weightDeltas[numLayers - 2][node][weight] = activations[numLayers - 2][weight] * gradientAggregate[node];
         }
-
-        // cout << "Adjusting bias.\n";
 
         // Adjust bias
         weightDeltas[numLayers - 2][node][-1] = gradientAggregate[node]; // bias
     }
 
     // Iterate back through network
-    // cout << "Backpropogating...\n";
     for (int layer = numLayers - 2; layer >= 1; layer--)
     {
-        // cout << "Starting layer " << layer << '\n';
-
-        // cout << "GA size: " << gradientAggregate.getSize() << '\n'
-        //      << "Weights[layer] size: h = " << weights[layer].getSize() << " w = " << weights[layer][0].getSize() << '\n';
-
         // Dot product equals by weights of above layer
         dotEquals(gradientAggregate, weights[layer]);
-
-        // cout << "Applying Hadamard product...\n";
 
         // Hadamard equals by sigder of current layer act
         for (int i = 0; i < gradientAggregate.getSize() - 1; i++)
@@ -476,8 +478,6 @@ void Network::backprop(const vector<double> &Expected)
         }
 
         // Compute weight deltas for this layer
-
-        // cout << "Converting GA to grad wrt weights...\n";
 
         // CONVERT GRADIENT AGGREGATE TO GRADIENT WRT WEIGHTS
         // partial C wrt w^l_{jk} = a_k^{l-1} (ga)^l_j
@@ -490,12 +490,8 @@ void Network::backprop(const vector<double> &Expected)
             // Iterate through weights
             for (int weight = 0; weight < sizes[layer - 1]; weight++)
             {
-                // cout << "Adjusting weight " << layer << " " << node << " " << weight << '\n';
-
                 weightDeltas[layer - 1][node][weight] = activations[layer - 1][weight] * gradientAggregate[node];
             }
-
-            // cout << "Adjusting bias.\n";
 
             // Adjust bias
             weightDeltas[layer - 1][node][-1] = gradientAggregate[node]; // bias
@@ -525,11 +521,8 @@ void Network::backprop(const vector<double> &Expected)
         magnitude = 1;
     }
 
-    // cout << "Done. Performing stochastic gradient descent...\n";
-
     // Modify weights by computed gradient values
     double coefficient = drand(minStepSize, maxStepSize) / magnitude;
-    // cout << "Coeff: " << coefficient << '\n';
 
     for (int layer = 1; layer < numLayers; layer++)
     {
@@ -537,15 +530,10 @@ void Network::backprop(const vector<double> &Expected)
         {
             for (int weight = 0; weight < weights[layer - 1][node].getSize(); weight++)
             {
-                // cout << "l " << layer << " n " << node << " w " << weight << " by " << coefficient * weightDeltas[layer - 1][node][weight] << '\n';
                 weights[layer - 1][node][weight] -= coefficient * weightDeltas[layer - 1][node][weight];
             }
         }
     }
-
-    // cout << "Finished.\n";
-
-    // Die because this algorithm sucks hardcore
 
     return;
 }
@@ -570,8 +558,8 @@ void Network::train(const int &Num)
     {
         // Choose random dataset
         int choice = random() % trainingData.size();
-        vector<double> inp = trainingData[choice].input;
-        vector<double> exp = trainingData[choice].output;
+        SafeArray<double> inp = trainingData[choice].input;
+        SafeArray<double> exp = trainingData[choice].output;
 
         // Train on the selected dataset
         prop(inp);
@@ -603,13 +591,13 @@ double Network::getError()
 
     for (auto set : trainingData)
     {
-        auto obs = prop(set.input);
-        for (int i = 0; i < set.output.size(); i++)
+        SafeArray<double> obs = prop(set.input);
+        for (int i = 0; i < set.output.getSize(); i++)
         {
             sum += pow(set.output[i] - obs[i], 2);
         }
     }
-    sum /= trainingData[0].output.size();
+    sum /= trainingData[0].output.getSize();
 
     return sum;
 }

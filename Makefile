@@ -6,6 +6,7 @@
 STEM = clang++ -pedantic -Wall -Werror -g
 OBJECTS = build/npool.o build/networkSave.o build/image.o build/network.o
 
+
 #####################################################
 
 install: /usr/include/jorbnet
@@ -57,5 +58,10 @@ docs/outline.pdf: docs/outline.tex
 uninstall:
 	sudo rm -f /usr/bin/jorbnet-flags
 	sudo rm -rf /usr/include/jorbnet
+
+reinstall:
+	$(MAKE) uninstall
+	$(MAKE) clean
+	$(MAKE) install
 
 #####################################################

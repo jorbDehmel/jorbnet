@@ -9,7 +9,7 @@ GPLv3 held by author
 #include "image.hpp"
 
 dataset loadBMP(const string &Filepath, const int &W, const int &H,
-                const vector<double> &Expected, const Mode M)
+                const SafeArray<double> &Expected, const Mode M)
 {
     // Load image from file into a SDL surface
     SDL_Surface *original = SDL_LoadBMP(Filepath.c_str());
@@ -20,8 +20,8 @@ dataset loadBMP(const string &Filepath, const int &W, const int &H,
     unsigned int *pixels = (unsigned int *)scaled->pixels;
 
     // Transfer from SDL surface to dataset depending on mode
-    dataset out;
     unsigned char r, g, b, a;
+    vector<double> inputTemp;
     for (int i = 0; i < W * H; i++)
     {
         SDL_GetRGBA(pixels[i], scaled->format, &r, &g, &b, &a);
@@ -29,21 +29,21 @@ dataset loadBMP(const string &Filepath, const int &W, const int &H,
         switch (M)
         {
         case RGBA:
-            out.input.push_back(r);
-            out.input.push_back(g);
-            out.input.push_back(b);
-            out.input.push_back(a);
+            inputTemp.push_back(r);
+            inputTemp.push_back(g);
+            inputTemp.push_back(b);
+            inputTemp.push_back(a);
             break;
         case RGB:
-            out.input.push_back(r);
-            out.input.push_back(g);
-            out.input.push_back(b);
+            inputTemp.push_back(r);
+            inputTemp.push_back(g);
+            inputTemp.push_back(b);
             break;
         case BW_double:
-            out.input.push_back((r + g + b) / 3.0);
+            inputTemp.push_back((r + g + b) / 3.0);
             break;
         case BW_char:
-            out.input.push_back((unsigned char)((r + g + b) / 3.0));
+            inputTemp.push_back((unsigned char)((r + g + b) / 3.0));
             break;
         default:
             throw runtime_error("Invalid mode selection; Cannot open .bmp file.");
@@ -53,16 +53,32 @@ dataset loadBMP(const string &Filepath, const int &W, const int &H,
     SDL_FreeSurface(scaled);
     SDL_FreeSurface(original);
 
-    for (auto exp : Expected)
+    vector<double> outputTemp;
+
+    for (int i = 0; i < Expected.size(); i++)
     {
-        out.output.push_back(exp);
+        outputTemp.push_back(Expected[i]);
+    }
+
+    dataset out;
+
+    out.input = SafeArray<double>(inputTemp.size());
+    for (int i = 0; i < inputTemp.size(); i++)
+    {
+        out.input[i] = inputTemp[i];
+    }
+
+    out.output = SafeArray<double>(outputTemp.size());
+    for (int i = 0; i < outputTemp.size(); i++)
+    {
+        out.output[i] = outputTemp[i];
     }
 
     return out;
 }
 
 void saveBMP(const string &Filepath, const int &W, const int &H,
-             const vector<double> &What, const Mode M)
+             const SafeArray<double> &What, const Mode M)
 {
     SDL_Surface *surface = SDL_CreateRGBSurface(0, W, H, 32, 0, 0, 0, 0);
     SDL_Renderer *rend = SDL_CreateSoftwareRenderer(surface);
@@ -89,12 +105,12 @@ void saveBMP(const string &Filepath, const int &W, const int &H,
     case BW_double:
     case BW_char:
         assert(What.size() >= W * H);
-        for (auto p : What)
+        for (int i = 0; i < What.size(); i++)
         {
-            SDL_SetRenderDrawColor(rend, p, p, p, p);
+            SDL_SetRenderDrawColor(rend, What[i], What[i], What[i], What[i]);
             SDL_RenderDrawPoint(rend, i % W, i / W);
-            i++;
         }
+
         break;
     default:
         throw runtime_error("Invalid mode selection; Cannot save .bmp file.");
@@ -112,7 +128,7 @@ vector<dataset> addNoise(const dataset &To, const double &Amount, const int &Num
     for (int i = 0; i < NumOutputs; i++)
     {
         dataset toAdd = To;
-        for (int j = 0; j < toAdd.input.size(); j++)
+        for (int j = 0; j < toAdd.input.getSize(); j++)
         {
             toAdd.input[j] += drand(-Amount, Amount);
         }

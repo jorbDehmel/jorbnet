@@ -11,6 +11,7 @@ GPLv3 held by author
 
 #include <iostream>
 #include <string>
+#include <vector>
 using namespace std;
 
 #define FATAL true
@@ -30,7 +31,7 @@ public:
     SafeArray()
     {
         freed = true;
-        maxSize = size = 0;
+        maxSize = sizeNum = 0;
         data = nullptr;
         return;
     }
@@ -40,8 +41,8 @@ public:
         try
         {
             freed = false;
-            maxSize = size = Size;
-            data = new T[size];
+            maxSize = sizeNum = Size;
+            data = new T[sizeNum];
         }
         catch (...)
         {
@@ -60,12 +61,12 @@ public:
     }
 
     // Steal another safearray's identity
-    SafeArray(SafeArray<T> &Other)
+    SafeArray(const SafeArray<T> &Other)
     {
         freed = false;
-        maxSize = size = Other.size;
-        data = new T[size];
-        for (int i = 0; i < size; i++)
+        maxSize = sizeNum = Other.sizeNum;
+        data = new T[sizeNum];
+        for (int i = 0; i < sizeNum; i++)
         {
             data[i] = Other[i];
         }
@@ -91,12 +92,50 @@ public:
         }
 
         freed = false;
-        maxSize = size = Other.size;
-        data = new T[size];
-        for (int i = 0; i < size; i++)
+        maxSize = sizeNum = Other.sizeNum;
+        data = new T[sizeNum];
+        for (int i = 0; i < sizeNum; i++)
         {
             data[i] = Other[i];
         }
+        return;
+    }
+
+    void operator=(const vector<T> &Other)
+    {
+        if (!freed)
+        {
+            free();
+        }
+
+        freed = false;
+        maxSize = sizeNum = Other.size();
+        data = new T[sizeNum];
+        for (int i = 0; i < sizeNum; i++)
+        {
+            data[i] = Other[i];
+        }
+        return;
+    }
+
+    void operator=(const initializer_list<T> &What)
+    {
+        if (!freed)
+        {
+            free();
+        }
+
+        freed = false;
+        maxSize = sizeNum = What.size();
+        data = new T[sizeNum];
+
+        int i = 0;
+        for (auto item : What)
+        {
+            (*this)[i] = item;
+            i++;
+        }
+
         return;
     }
 
@@ -107,7 +146,7 @@ public:
             delete[] data;
             data = nullptr;
             freed = true;
-            maxSize = size = 0;
+            maxSize = sizeNum = 0;
         }
         else
         {
@@ -138,10 +177,10 @@ public:
                 throw safearray_error("Freed access attempted!");
             }
         }
-        else if (I >= 0 && I >= size)
+        else if (I >= 0 && I >= sizeNum)
         {
             cout << "SafeArray error: Access denied to illegal element " << I
-                 << ". Size: " << size << ".\n";
+                 << ". Size: " << sizeNum << ".\n";
             if (FATAL)
             {
                 assert(false);
@@ -151,10 +190,10 @@ public:
                 throw safearray_error("Illegal access attempted!");
             }
         }
-        else if (I < 0 && I < -size)
+        else if (I < 0 && I < -sizeNum)
         {
             cout << "SafeArray error: Access denied to illegal element " << I
-                 << ". Size: " << size << ".\n";
+                 << ". Size: " << sizeNum << ".\n";
             if (FATAL)
             {
                 assert(false);
@@ -173,13 +212,18 @@ public:
         // Creature comfort
         else
         {
-            return data[size + I];
+            return data[sizeNum + I];
         }
     }
 
     int getSize() const
     {
-        return size;
+        return sizeNum;
+    }
+
+    int size() const
+    {
+        return sizeNum;
     }
 
     // HIGHLY UNSAFE! (But pointer casting is my favorite hobby)
@@ -203,18 +247,18 @@ public:
         }
         else if (To > 0)
         {
-            size = To;
+            sizeNum = To;
         }
         else if (To < 0)
         {
-            size += To;
+            sizeNum += To;
         }
 
         return;
     }
 
 protected:
-    int size;
+    int sizeNum;
     int maxSize;
     bool freed;
     T *data;

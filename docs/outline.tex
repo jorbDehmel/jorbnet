@@ -23,6 +23,7 @@ which will be calculated via the chain rule for partial derivatives.
 
 Pseudocode for finding the derivative of some node with respect to
 some weight $w_k$:
+
 \begin{verbatim}
 if w_k is in links:
     return links[w_k].previousActivation
@@ -37,6 +38,7 @@ else:
 Anatomy of an error node:
 
 Method 1 (vector norm):
+
 $$
 \begin{aligned}
     y &= \sqrt{\sum{(e_i - o_i)^2}} \\
@@ -45,6 +47,7 @@ $$
 $$
 
 Method 2 (easy derivative):
+
 $$
 \begin{aligned}
     y &= \frac{1}{n} \sum{(e_i - o_i)^2} \\
@@ -52,7 +55,7 @@ $$
 \end{aligned}
 $$
 
-Anatomy of a regular node:
+\subsection{Anatomy of a regular node:}
 
 Sigmoid $S$:
 $$
@@ -86,14 +89,14 @@ number of weights in the network. To perform gradient descent on the error, we
 must of course find the gradient. This is a vector of $N$ dimensions where the
 $i$th entry is the derivative of the error with respect to the $i$th weight.
 Once the gradient is found, we will move some amount backwards in its direction.
-This amounts to decrementing each weight by its corrosponding gradient entry
+This amounts to decrementing each weight by its corresponding gradient entry
 times some scalar.
 
 \section{Stochastic Gradient Descent}
 
 This above method has a low rate of convergence. This can be fixed by
 introducing an aspect of randomness to our gradient descent. Instead of only
-using the unit gradient vector, we can use this times some random icrement. This
+using the unit gradient vector, we can use this times some random increment. This
 allows it to jump out of local error minima in the pursuit of global minima.
 
 \section{The Network Pool and Periodic Pruning}
@@ -104,7 +107,7 @@ too deep to escape from, even through stochastic means. Thus, we introduce
 network pools and pruning, two heuristic methods of network improvement.
 
 A **network pool** holds several clones of a network. It trains all of these on
-seperate threads, and checks in periodically. At each check, it **prunes** some
+separate threads, and checks in periodically. At each check, it **prunes** some
 number of the worst-performing networks (deletes them). It then repopulates the
 pool with clones of the best-performing network. During the cloning process, all
 the weights in the clone are modified by some random amount to shove their
@@ -112,10 +115,10 @@ error gradients out of local minima. This is also beneficial due to its multi-
 threading, which allows capable machines to gain better improvements in network
 accuracy over shorter periods of time. A good unit for the measurement of this
 is thus the error-nanosecond, computed as the product of the final network error
-and the ellapsed nanoseconds of training, where a lower number is better.
+and the elapsed nanoseconds of training, where a lower number is better.
 
 These methods constitute a heuristic because the random modulation of weights
-may not neccessarily improve the network's error. If an ideal network is found
+may not necessarily improve the network's error. If an ideal network is found
 as the root of the pool, there is no point in the cloning and modulating process.
 However, this is much less likely to occur than local error minima.
 
@@ -159,7 +162,7 @@ Ratio of pool to regular: 3.31 e42 (42 orders of magnitude)
 The regular training method failed to converge.
 Regular Error-NS: 3.69 e9
 Pool Error-NS: 2.33 e-69
-Ratio of pool to regular: 1.58 e78 (78 orders of magniture)
+Ratio of pool to regular: 1.58 e78 (78 orders of magnitude)
 
 \section{Analysis}
 
@@ -167,11 +170,11 @@ Although it seems unfair to compare this dataset, upon which the regular
 training process converged properly 0 times, this is representative and
 sequentially recorded data. Note that these tests were run on a low-end
 converted chromebook with only 4 threads. On a better machine, the
-network pool would perform even better due to its abaility to be multithreaded.
+network pool would perform even better due to its ability to be multithreaded.
 
 \section{Efficiency}
 
-This model works. However, it is extremely inneficient. For a network
+This model works. However, it is extremely inefficient. For a network
 of dimensions $[64, 20, 1]$ (used for the extremely trivial case of a
 8x8-pixel image with only light hidden layering), a single training pass
 takes almost 2 seconds. This is unacceptable. This motivates us to seeks more
@@ -181,14 +184,14 @@ efficient algorithms.
 
 One may note that the weighted sum of a node ($\sum{w_j I_j} + b$ for items $0-j$
 of the weights $w$ and inputs $I$ with bias $b$) is equal to the dot product
-of the collumn vectors representing the inputs and the weights. Each entry in
+of the column vectors representing the inputs and the weights. Each entry in
 the input vector is in turn the sigmoid-normalized value of another dot product.
 
 To utilize this fact we must step away from our object-oriented approach and
 instead represent the network as a set of vectors. We may represent the activations
-of one layer of the network as a collumn vector, and the set of all activations as
+of one layer of the network as a column vector, and the set of all activations as
 an array of such vectors. Since each node in the network has its own associated
-weights and bias, these will be stored in an auxilery data struction.
+weights and bias, these will be stored in an auxiliary data structure.
 
 While the activation data structure was a vector of vectors, the weights will be
 a vector of matrices, with each matrix representing the weights of a layer.
@@ -248,9 +251,9 @@ Where $j$ is the current layer, $l$ is the height of the layer below (the relati
 input layer), and $k$ is the height of the current layer $j$.
 
 Each row in this matrix represents a source node in the current layer, and each
-collumn (except the final one) represents a destination node in the layer below.
-The intersection of a collumn and a row is the weight that connects these two nodes.
-The final collumn in the matrix represents the bias of the node, which can be seen
+column (except the final one) represents a destination node in the layer below.
+The intersection of a column and a row is the weight that connects these two nodes.
+The final column in the matrix represents the bias of the node, which can be seen
 as a weight connected to a "ghost node" whose activation is always 1.
 
 We can visualize the weights of an entire network as a 3-dimensional array. The first
@@ -291,7 +294,7 @@ weights = [
     ],
 
     # The weights for the output layer
-    # (written consisely)
+    # (written concisely)
     [[9, 1, 2],
     [3, 4, 5],
     [6, 7, 8],
@@ -390,7 +393,7 @@ find the following (evaluated left to right).
     \end{aligned}
 \]
 
-This can be interpretted as the errors attributable to each of these weights (we will
+This can be interpreted as the errors attributable to each of these weights (we will
 address biases shortly).
 
 One may notice that the full form of the partial derivative will take a
@@ -415,7 +418,7 @@ of evaluation. This yields the gradient vector $\vec{E}$
     \end{aligned}
 \]
 
-Using this repetetive nature, we will assign the following interim value $\delta$,
+Using this repetitive nature, we will assign the following interim value $\delta$,
 which I call the Gradient Aggregate.
 
 \[
@@ -448,7 +451,7 @@ our computed gradient aggregate from each layer $l$ to the below layer $l - 1$, 
 the attributable error for each layer as we pass backwards through the network.
 
 After the attributable errors for each weight in each layer have been calculated (1 pass
-of backpropogation), we can then apply our same stochastic gradient descent algorithm to
+of backpropagation), we can then apply our same stochastic gradient descent algorithm to
 each weight.
 
 Note: Since the activation leading into a bias is always 1, we can say that the error
@@ -462,7 +465,7 @@ with.
     \end{aligned}
 \]
 
-With this, we can fully implement our linear-algebra based backpropogation algorithm.
+With this, we can fully implement our linear-algebra based backpropagation algorithm.
 
 \section{Analysis}
 
@@ -607,7 +610,7 @@ double sinActDer(const double &Act)
 
 \section{Space-Time Complexity Analysis}
 
-The linear-algebra-based backpropogation algorithm must, due to its
+The linear-algebra-based backpropagation algorithm must, due to its
 cascading nature, touch each weight in the network at least once. Thus,
 we can establish a reasonable lower bound for the time complexity to be
 $\Omega (w)$, where $w$ is the number of weights in the network.
@@ -648,7 +651,7 @@ only the derivative of it. Thus,
 We could then impose this as the error function. Generally,
 we shall define an \textbf{Equation-Informed Neural Network (EINN)}
 as one with an error function imposed as such. An \textbf{Ordinary Neural 
-Network (ONN)} is seen as the trivial case of an EINN where the error
+Network (ONN)} is seen as the trivial case of an Inn where the error
 function is the magnitude (2-norm) of the error vector, IE 
 
 \[
@@ -666,7 +669,43 @@ laws of nature, in which case it would be considered a \textbf{Physics-Informed
 Neural Network (PINN)}.
 
 This sort of system allows us to utilize mathematical derivations about
-the nature of solution sets as additional training data.
+the nature of solution sets as additional training data. We can simply replace
+our regular error function with one derived in this manner.
+
+If we want our network to learn our training data and our formulas, we must
+define an error function which incorporates both. Denoting our EINN error
+function as $C_e$ and our ordinary error function as $C_o$,
+
+\[
+\begin{aligned}
+    &C := C_e + C_o \\
+    \vec{\nabla} &C = \vec{\nabla}C_e + \vec{\nabla}C_o
+\end{aligned}
+\]
+
+For instance, if we were to use the nonlinear $C_e$ as denoted below
+in conjunction with our standard easy-derive $C_o$, the following would
+hold.
+
+\[
+\begin{aligned}
+    &l_1 l_2 + (l_3)^2 = l_1 l_3 - l_1 \\
+    &l_1 l_2 + (l_3)^2 - l_1 l_3 + l_1 = 0 \\
+    C_e &:= \left| l_1 l_2 + (l_3)^2 - l_1 l_3 + l_1 \right| \\
+    C_o &= \left| \frac{1}{n} \left( (e_1 - l_1)^2 + (e_2 - l_2)^2 + (e_3 - l_3)^2 \right) \right| \\
+    C = C_e + C_o &= \left| l_1 l_2 + (l_3)^2 - l_1 l_3 + l_1 + \frac{1}{n} \left( (e_1 - l_1)^2 + (e_2 - l_2)^2 + (e_3 - l_3)^2 \right) \right| \\
+    \frac{\partial C}{\partial l_1} &= \left| l_2 - l_3 + 1 - \frac{2}{n}(e_1 - l_1) \right| \\
+    \frac{\partial C}{\partial l_2} &= \left| l_1 - \frac{2}{n}(e_2 - l_2) \right| \\
+    \frac{\partial C}{\partial l_3} &= \left| 2 l_3 - l_1 - \frac{2}{n}(e_3 - l_3) \right| \\
+    \vec{\nabla} C &= \left< \left| l_2 - l_3 + 1 - \frac{2}{n}(e_1 - l_1) \right|, 
+        \left| l_1 - \frac{2}{n}(e_2 - l_2) \right|,
+        \left| 2 l_3 - l_1 - \frac{2}{n}(e_3 - l_3) \right| \right>
+\end{aligned}
+\]
+
+We would then use this instead of our usual $\vec{\nabla} C_o$ when establishing
+our gradient aggregate during backpropagation, and the network would learn for its
+output to fall within this solution set.
 
 \section{Sources}
 

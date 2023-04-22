@@ -23,9 +23,10 @@ enum Mode
 };
 
 dataset loadBMP(const string &Filepath, const int &W, const int &H,
-                const vector<double> &Expected, const Mode M = BW_double);
+                const SafeArray<double> &Expected, const Mode M = BW_double);
+
 void saveBMP(const string &Filepath, const int &W, const int &H,
-             const vector<double> &What, const Mode M);
+             const SafeArray<double> &What, const Mode M);
 
 vector<dataset> addNoise(const dataset &To, const double &Amount, const int &NumOutputs);
 

@@ -22,6 +22,10 @@ using namespace std;
 #define chrono_now() chrono::high_resolution_clock::now()
 #define chrono_ns(A) chrono::duration_cast<chrono::nanoseconds>(A).count()
 
+// Standard error function and derivative (for ONNs)
+double __stderr(const SafeArray<double> &Obs, const SafeArray<double> &Exp);
+SafeArray<double> __stderrder(const SafeArray<double> &Obs, const SafeArray<double> &Exp);
+
 // Get a string representation of an amount of nanoseconds
 string toTime(long long Ns);
 
@@ -47,8 +51,8 @@ void dotEquals(SafeArray<double> &What, const SafeArray<SafeArray<double>> &By);
 // A training dataset
 struct dataset
 {
-    vector<double> input;
-    vector<double> output;
+    SafeArray<double> input;
+    SafeArray<double> output;
 };
 
 // Network using linear algebra
@@ -63,8 +67,8 @@ public:
     Network &operator=(const Network &Other);
 
     // Basic propogation and backpropogation functions
-    vector<double> prop(const vector<double> &Input); // Time proportional to the number of weights in the network
-    void backprop(const vector<double> &Expected);    // Time proportional to the number of weights in the network
+    SafeArray<double> prop(const SafeArray<double> &Input); // Time proportional to the number of weights in the network
+    void backprop(const SafeArray<double> &Expected);       // Time proportional to the number of weights in the network
 
     // Assumes weights is one item longer, with the final entry being bias
     double bdot(SafeArray<double> Inputs, SafeArray<double> Weights, const int &SizeOfInputs) const;
@@ -72,6 +76,10 @@ public:
     // Current activation function and its derivative (these can be swapped out)
     double (*act)(const double &X) = __sigmoid;
     double (*actder)(const double &X) = __sigder;
+
+    // Error function and der (for EINN/ONN junk)
+    double (*err)(const SafeArray<double> &Obs, const SafeArray<double> &Exp) = __stderr;
+    SafeArray<double> (*errder)(const SafeArray<double> &Obs, const SafeArray<double> &Exp) = __stderrder;
 
     // Training stuff for convenience
     vector<dataset> trainingData;
