@@ -24,7 +24,7 @@ SafeArray<double> __stderrder(const SafeArray<double> &Obs, const SafeArray<doub
     SafeArray<double> out(Obs.getSize());
     for (int i = 0; i < out.getSize(); i++)
     {
-        out[i] = -2 / out.getSize() * (Exp[i] - Obs[i]);
+        out[i] = (-2 / (double)out.getSize()) * (Exp[i] - Obs[i]);
     }
     return out;
 }
@@ -372,6 +372,7 @@ SafeArray<double> Network::prop(const SafeArray<double> &Input)
     // Ensure input vector matches network size
     if (Input.getSize() != sizes[0])
     {
+        cout << "Requires " << sizes[0] << " but was given " << Input.size() << '\n';
         throw runtime_error("Error: Input size does not match network size");
     }
 

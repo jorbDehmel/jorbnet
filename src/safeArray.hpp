@@ -257,12 +257,12 @@ public:
         return;
     }
 
-    T *begin()
+    T *begin() const
     {
         return &data[0];
     }
 
-    T *end()
+    T *end() const
     {
         return &data[sizeNum];
     }
