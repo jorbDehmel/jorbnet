@@ -3,7 +3,7 @@
 \usepackage{geometry}
 \geometry{letterpaper}
 
-\title{Ramblings On Machine Learning, Some Of Which May Have Some Applicability}
+\title{Ramblings On Machine Learning, Some Of Which May Be Useful}
 \author{Jordan E Dehmel}
 
 \newcommand\mat[1]{\mathbb{#1}}
@@ -11,6 +11,8 @@
 
 \begin{document}
 \maketitle
+
+\tableofcontents{}
 
 \section{Gradient Descent}
 
@@ -747,6 +749,12 @@ While this would not be
 
 Because in the second case, there is no input activation value which
 would satisfy our theorem.
+
+\section{Applications Of EINNs}
+
+Since the actual value of $C_e$ is not needed by the backpropagation algorithm,
+this is a prime application of partial differential equations whose analytical
+solutions are not known (hence the prevalence of PINNs).
 
 \section{Sources}
 
