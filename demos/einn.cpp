@@ -8,38 +8,46 @@ GPLv3 held by author
 
 #include <jorbnet/jorbNet.hpp>
 #include <iostream>
+#include <cmath>
 using namespace std;
 
-// a + b = 1
-// C_e := | a + b - 1 |
+// C_e := ab + ba^2 + asin(b)
 double error(const SafeArray<double> &Obs, const SafeArray<double> &Exp)
 {
     // C = C_e + C_o
     double out = __stderr(Obs, Exp);
 
-    out += Obs[0] + Obs[1] - 1;
+    // DO STUFF HERE
 
-    if (out < 0)
+    double toAdd = Obs[0] * Obs[1] + Obs[1] * pow(Obs[0], 2) + Obs[0] * sin(Obs[1]);
+
+    // END DOING STUFF
+
+    if (toAdd < 0)
     {
-        out *= -1;
+        toAdd *= -1;
     }
-    return out;
+    return out + toAdd;
 }
 
 /*
-C_e := | a + b - 1 |
-\frac{\partial C_e}{\partial a} = 1
-\frac{\partial C_e}{\partial b} = 1
+C_e := ab + ba^2 + asin(b)
 
-Not very interesting
+C_{ea} = b + 2ab + sin(b)
+C_{eb} = a + a^2  + acos(b)
 */
 SafeArray<double> errorDer(const SafeArray<double> &Obs, const SafeArray<double> &Exp)
 {
     // \vec{\nabla} C = \vec{\nabla} C_e + \vec{\nabla} C_o
     SafeArray<double> out = __stderrder(Obs, Exp);
 
-    out[0] += 1;
-    out[1] += 1;
+    // DO STUFF HERE
+    // NO CONSTANTS ALLOWED!
+
+    out[0] += Obs[1] + 2 * Obs[0] * Obs[1] + sin(Obs[1]);     // b + 2ab + sin(b)
+    out[1] += Obs[0] + pow(Obs[0], 2) + Obs[0] * cos(Obs[1]); // a + a^2 + acos(b)
+
+    // END DOING STUFF
 
     return out;
 }
@@ -76,41 +84,31 @@ int main(const int argc, const char *argv[])
     for (auto s : n.trainingData)
     {
         cout << s.input[0] << ":\t";
-
         auto out = n.prop(s.input);
-
         for (auto o : out)
         {
             cout << o << '\t';
         }
-
-        cout << "(err " << n.err(out, s.output) << ")";
-
-        cout << '\n';
+        cout << "(err " << n.err(out, s.output) << ")\n";
     }
 
     // Go
     cout << "\nTraining...\n";
     auto start = chrono_now();
-    n.train(100);
+    n.train(50000);
     auto end = chrono_now();
-    cout << "Took " << chrono_ns(end - start) << " ns.\n";
+    cout << "Took " << toTime(chrono_ns(end - start)) << ".\n";
 
     cout << '\n';
     for (auto s : n.trainingData)
     {
         cout << s.input[0] << ":\t";
-
         auto out = n.prop(s.input);
-
         for (auto o : out)
         {
             cout << o << '\t';
         }
-
-        cout << "(err " << n.err(out, s.output) << ' ' << (int)(n.err(out, s.output) + 0.5) << ")";
-
-        cout << '\n';
+        cout << "(err " << n.err(out, s.output) << ' ' << (int)(n.err(out, s.output) + 0.5) << ")\n";
     }
 
     return 0;

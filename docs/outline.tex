@@ -3,7 +3,7 @@
 \usepackage{geometry}
 \geometry{letterpaper}
 
-\title{Some Ramblings On Machine Learning}
+\title{Ramblings On Machine Learning, Some Of Which May Have Some Applicability}
 \author{Jordan E Dehmel}
 
 \newcommand\mat[1]{\mathbb{#1}}
@@ -689,15 +689,15 @@ hold.
 
 \[
 \begin{aligned}
-    &l_1 l_2 + (l_3)^2 = l_1 l_3 - l_1 \\
-    &l_1 l_2 + (l_3)^2 - l_1 l_3 + l_1 = 0 \\
-    C_e &:= \left| l_1 l_2 + (l_3)^2 - l_1 l_3 + l_1 \right| \\
+    &l_1 l_2 + (l_3)^2 = l_1 l_3 \\
+    &l_1 l_2 + (l_3)^2 - l_1 l_3 = 0 \\
+    C_e &:= \left| l_1 l_2 + (l_3)^2 - l_1 l_3 \right| \\
     C_o &= \left| \frac{1}{n} \left( (e_1 - l_1)^2 + (e_2 - l_2)^2 + (e_3 - l_3)^2 \right) \right| \\
-    C = C_e + C_o &= \left| l_1 l_2 + (l_3)^2 - l_1 l_3 + l_1 + \frac{1}{n} \left( (e_1 - l_1)^2 + (e_2 - l_2)^2 + (e_3 - l_3)^2 \right) \right| \\
-    \frac{\partial C}{\partial l_1} &= \left| l_2 - l_3 + 1 - \frac{2}{n}(e_1 - l_1) \right| \\
+    C = C_e + C_o &= \left| l_1 l_2 + (l_3)^2 - l_1 l_3 + \frac{1}{n} \left( (e_1 - l_1)^2 + (e_2 - l_2)^2 + (e_3 - l_3)^2 \right) \right| \\
+    \frac{\partial C}{\partial l_1} &= \left| l_2 - l_3 - \frac{2}{n}(e_1 - l_1) \right| \\
     \frac{\partial C}{\partial l_2} &= \left| l_1 - \frac{2}{n}(e_2 - l_2) \right| \\
     \frac{\partial C}{\partial l_3} &= \left| 2 l_3 - l_1 - \frac{2}{n}(e_3 - l_3) \right| \\
-    \vec{\nabla} C &= \left< \left| l_2 - l_3 + 1 - \frac{2}{n}(e_1 - l_1) \right|, 
+    \vec{\nabla} C &= \left< \left| l_2 - l_3 - \frac{2}{n}(e_1 - l_1) \right|, 
         \left| l_1 - \frac{2}{n}(e_2 - l_2) \right|,
         \left| 2 l_3 - l_1 - \frac{2}{n}(e_3 - l_3) \right| \right>
 \end{aligned}
@@ -707,9 +707,53 @@ We would then use this instead of our usual $\vec{\nabla} C_o$ when establishing
 our gradient aggregate during backpropagation, and the network would learn for its
 output to fall within this solution set.
 
+\section{Restrictions Upon $C_e$}
+
+For our $C_e$ to be useful, it must be the case that
+
+\[
+\begin{aligned}
+    \verb|THEOREM| \\
+    \vec{\nabla} C_e (\vec{a}) = \vec{0} &\where \vec{a} \in \mathbb{R}^n
+\end{aligned}
+\]
+
+For some final activation vector $\vec{a}$. Otherwise, one or more elements of 
+the gradient vector will never be zero, and the network will never converge upon
+a satisfactory solution (this is due to the iterative nature of a neural network).
+
+For instance, the following would be acceptable
+
+\[
+\begin{aligned}
+    &\left[ a, b, c \right] := \left[ l_1, l_2, l_3 \right] \\
+    C_e &:= ab + bc + ca + \sin{abc} \\
+    \frac{\partial C_e}{\partial a} &= b + c + bc \cos{abc} \\
+    \frac{\partial C_e}{\partial b} &= a + c + ac \cos{abc} \\
+    \frac{\partial C_e}{\partial c} &= b + a + ab \cos{abc} \\
+\end{aligned}
+\]
+
+While this would not be
+
+\[
+\begin{aligned}
+    C_e &:= a + b - 5 \\
+    \frac{\partial C_e}{a} &= 1 \\
+    \frac{\partial C_e}{b} &= 2 \\
+    \frac{\partial C_e}{c} &= 0 \\
+\end{aligned}
+\]
+
+Because in the second case, there is no input activation value which
+would satisfy our theorem.
+
 \section{Sources}
 
-https://en.wikipedia.org/wiki/Backpropagation \\
-http://neuralnetworksanddeeplearning.com/chap2.html
+\begin{enumerate}
+    \item{https://en.wikipedia.org/wiki/Backpropagation}
+    \item{http://neuralnetworksanddeeplearning.com/chap2.html}
+    \item{All source code available at \verb|github.com/jorbDehmel/jorbnet|}
+\end{enumerate}
 
 \end{document}
