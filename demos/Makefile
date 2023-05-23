@@ -7,12 +7,15 @@ STEM = clang++ -pedantic -Wall -Werror -g
 
 #####################################################
 
-all: main.out npool.out image.out imagepool.out strip.out networkData.out einn.out
+all: main.out spike.out npool.out image.out imagepool.out strip.out networkData.out einn.out
 
 #####################################################
 
 main.out:	network.cpp /usr/include/jorbnet
 	$(STEM) -o main.out network.cpp `jorbnet-flags`
+
+spike.out:	spike.cpp /usr/include/jorbnet
+	$(STEM) -o spike.out spike.cpp `jorbnet-flags`
 
 npool.out:	poolmain.cpp /usr/include/jorbnet
 	$(STEM) -o npool.out poolmain.cpp `jorbnet-flags`

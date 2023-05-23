@@ -103,6 +103,8 @@ public:
     time_t creationTime;
     long dataInfo;
 
+    friend class SpikeNetwork;
+
 protected:
     // Internal data structure containing network data
     int numLayers = 0;

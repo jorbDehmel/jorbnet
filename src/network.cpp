@@ -432,16 +432,6 @@ void Network::backprop(const SafeArray<double> &Expected)
     // Amount to modify the weights by is
     // = dot(gradientAggregate, activationsOfLayerBelow)
 
-    // Not sure what I was smoking when I wrote this, but it doesn't make any sense:
-    /*double C = 0;
-    for (int i = 0; i < sizes[numLayers - 1]; i++)
-    {
-        C += pow(Expected[i] - activations[-1][i], 2);
-        // cout << "Exp: " << Expected[i] << " act: " << activations[-1][i] << '\n';
-    }
-    C /= sizes[numLayers - 1];
-    // This value is NOT OF ANY USE in calculating the partial derivative of the error function!*/
-
     // Set up gradient aggregate as gradient of errors wrt final acts
     // Then hadamard-ed by vector of sigder of previous final act
 

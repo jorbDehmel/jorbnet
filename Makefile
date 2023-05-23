@@ -4,7 +4,7 @@
 #####################################################
 
 STEM = clang++ -pedantic -Wall -Werror -g
-OBJECTS = build/npool.o build/networkSave.o build/image.o build/network.o
+OBJECTS = build/npool.o build/networkSave.o build/image.o build/network.o build/spike.o
 
 
 #####################################################
@@ -41,10 +41,13 @@ build/image.o:	src/image.hpp src/image.cpp
 build/network.o:	src/network.hpp src/network.cpp
 	$(STEM) -c -o build/network.o src/network.cpp
 
+build/spike.o:	src/spike.hpp src/spike.cpp
+	$(STEM) -c -o build/spike.o src/spike.cpp
+
 #####################################################
 
 clean:
-	rm -rf build/*.o *.a
+	rm -rf build/*.o *.a *.aux *.log *.toc *.a
 
 #####################################################
 

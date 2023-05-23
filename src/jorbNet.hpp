@@ -19,4 +19,7 @@ GPLv3 held by author
 #include "image.hpp"
 #include "network.hpp"
 
+// Experimental (DO NOT USE):
+#include "spike.hpp"
+
 #endif

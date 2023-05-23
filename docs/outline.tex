@@ -617,7 +617,7 @@ cascading nature, touch each weight in the network at least once. Thus,
 we can establish a reasonable lower bound for the time complexity to be
 $\Omega (w)$, where $w$ is the number of weights in the network.
 
-\section{Equation-Informed Neural Networks (P.I.N.N.s)}
+\section{Equation-Informed Neural Networks; EINNs, ONNs, and PINNs}
 
 Suppose we enforce an additional invariant upon the network in the
 form of a specially-designed error function.
@@ -724,6 +724,9 @@ For some final activation vector $\vec{a}$. Otherwise, one or more elements of
 the gradient vector will never be zero, and the network will never converge upon
 a satisfactory solution (this is due to the iterative nature of a neural network).
 
+Generally, we want our $C_e$ to be nonlinear (where nonlinearity is the complement
+of linearity, IE they are mutually exclusive).
+
 For instance, the following would be acceptable
 
 \[
@@ -755,6 +758,48 @@ would satisfy our theorem.
 Since the actual value of $C_e$ is not needed by the backpropagation algorithm,
 this is a prime application of partial differential equations whose analytical
 solutions are not known (hence the prevalence of PINNs).
+
+This is not particularly applicable to my fields of study, but there seems to
+be a lot of buzz around it.
+
+\section{Spiking Neural Networks}
+
+\textbf{Spiking Neural Networks (SNNs)} are a more biologically accurate type
+of ANN. In this model, signal is propagated forward only if its activation 
+passes some threshold. This makes it minorly more computationally efficient.
+The mathematical model, with the threshold substituted with $b$ and a running
+activation sum $s$, is below.
+
+\[
+\begin{aligned}
+    a_{\verb|out|} &=
+    \begin{cases}
+        0 & s < b \\
+        1 & b \leq s \\
+    \end{cases} \\
+\end{aligned}
+\]
+
+If the activation becomes 1, then the running activation sum of the next layer's
+neurons will be incremented by some weight associated with the activated neuron.
+At this time, the running activation sum will also be reset to zero. Notice that
+this is analogous to our earlier model with a boolean transfer function. Thus, we
+could use this model on networks which have already been trained via our usual
+method and expect similar results. To fully convert this into a format compatible
+with our system, we say the following.
+
+\[
+\begin{aligned}
+    a_{\verb|out|} &=
+    \begin{cases}
+        0 & s + b < 0 \\
+        1 & s + b \geq 0 \\
+    \end{cases} \\
+\end{aligned}
+\]
+
+This is analogous to a boolean sigmoid function, although is is notably not
+differentiable.
 
 \section{Sources}
 
